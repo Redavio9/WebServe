@@ -10,7 +10,12 @@ int main()
   int port = 8080; // Choisissez le port que vous souhaitez utiliser
   int backlog = 5; // Nombre maximal de connexions en attente
 
+  // -family définit la famille du socket. Les valeurs principales sont AF_INET pour un socket IPv4, AF_INET6 pour un support IPv6. 
+  // -type spécifie le type de socket. Les valeurs principales utilisées sont SOCK_STREAM pour TCP, SOCK_DGRAM pour UDP. 
+  // -protocol définit le protocole à utiliser. Il sera dépendant du type de socket et de sa famille. Les valeurs principales sont IPPROTO_TCP pour un socket TCP, IPPROTO_UDP pour un socket UDP.
+
   int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+  
   if (serverSocket == -1)
   {
     std::cerr << "Erreur lors de la création du socket." << std::endl;
@@ -21,7 +26,6 @@ int main()
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(port);
   serverAddress.sin_addr.s_addr = INADDR_ANY;
-  memset(serverAddress.sin_zero, '\0', sizeof(serverAddress.sin_zero));
 
   if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == -1)
   {
@@ -57,9 +61,21 @@ int main()
       close(serverSocket);
       return -1;
     }
-
-    const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Bienvenue Solix !</h1></body></html>";
+    const char *response =  "HTTP/1.1 200 OK\r\n"
+                            "Content-Type: text/html\r\n\r\n"
+                            "<html>"
+                            "<head>"
+                            "<style>"
+                            "body { background-color: #f2f2f2; font-family: Arial, sans-serif; }"
+                            "h1 { color: #333333; text-align: center; }"
+                            "</style>"
+                            "</head>"
+                            "<body>"
+                            "<h1>Bienvenue sur notre site !</h1>"
+                            "</body>"
+                            "</html>";
     int bytesSent = send(clientSocket, response, strlen(response), 0);
+
     if (bytesSent == -1)
     {
       std::cerr << "Erreur lors de l'envoi de la réponse." << std::endl;
@@ -67,11 +83,10 @@ int main()
       close(serverSocket);
       return -1;
     }
-
     close(clientSocket);
   }
 
   close(serverSocket);
-
+  
   return 0;
 }
