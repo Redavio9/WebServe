@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <cstring>
+#include <arpa/inet.h>
 
 int main()
 {
@@ -25,7 +26,7 @@ int main()
   sockaddr_in serverAddress;
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(port);
-  serverAddress.sin_addr.s_addr = INADDR_ANY;
+  serverAddress.sin_addr.s_addr = inet_addr("10.12.6.7");
 
   if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == -1)
   {
@@ -53,7 +54,8 @@ int main()
       return -1;
     }
     char buffer[1024];
-    int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+    // int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+    int bytesRead = read(clientSocket, buffer, sizeof(buffer));
     if (bytesRead == -1)
     {
       std::cerr << "Erreur lors de la lecture des données." << std::endl;
@@ -74,7 +76,8 @@ int main()
                             "<h1>Bienvenue sur notre site !</h1>"
                             "</body>"
                             "</html>";
-    int bytesSent = send(clientSocket, response, strlen(response), 0);
+    // int bytesSent = send(clientSocket, response, strlen(response), 0);
+    int bytesSent = write(clientSocket, response, strlen(response));
 
     if (bytesSent == -1)
     {
