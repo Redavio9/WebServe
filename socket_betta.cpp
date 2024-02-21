@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 11:35:08 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/21 11:49:36 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/21 13:21:26 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,10 @@
 
 // Déclaration des fonctions
 int create_server_socket(int port);
-void accept_new_connection(int listener_socket, fd_set *all_sockets, int *fd_max);
-void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket);
+// void accept_new_connection(int listener_socket, fd_set *all_sockets, int *fd_max);
+// void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket);
+void accept_new_connection(int listener_socket, fd_set &read_fds, int *fd_max);
+void read_data_from_socket(int socket, fd_set &read_fds, int *fd_max, int server_socket, fd_set &write_fds);
 
 int main(void)
 {
@@ -39,8 +41,11 @@ int main(void)
     int status;
 
     // Pour surveiller les sockets clients :
-    fd_set all_sockets; // Ensemble de toutes les sockets du serveur
-    fd_set read_fds;    // Ensemble temporaire pour select()
+    // fd_set all_sockets; // Ensemble de toutes les sockets du serveur
+    fd_set read_fds;    // Ensemble read pour select()
+    fd_set write_fds;    // Ensemble write pour select()
+    fd_set copy_read_fds;    // Ensemble copy_write pour select()
+    fd_set copy_write_fds;    // Ensemble copy_write pour select()
     int fd_max = 0;     // Descripteur de la plus grande socket
     struct timeval timer;
 
@@ -55,11 +60,14 @@ int main(void)
     }
 
     // Préparation des ensembles de sockets pour select()
-    FD_ZERO(&all_sockets);
+    FD_ZERO(&copy_write_fds);
+    FD_ZERO(&copy_read_fds);
+    FD_ZERO(&write_fds);
     FD_ZERO(&read_fds);
-    FD_SET(server_socket_1, &all_sockets); // Ajout de la première socket serveur à l'ensemble
-    FD_SET(server_socket_2, &all_sockets); // Ajout de la deuxième socket serveur à l'ensemble
-    FD_SET(server_socket_3, &all_sockets); // Ajout de la troisième socket serveur à l'ensemble
+
+    FD_SET(server_socket_1, &read_fds); // Ajout de la première socket serveur à l'ensemble
+    FD_SET(server_socket_2, &read_fds); // Ajout de la deuxième socket serveur à l'ensemble
+    FD_SET(server_socket_3, &read_fds); // Ajout de la troisième socket serveur à l'ensemble
 
     // Trouver le descripteur de fichier maximum
     fd_max = std::max(server_socket_1, std::max(server_socket_2, server_socket_3));
@@ -69,13 +77,14 @@ int main(void)
     while (1) 
     { // Boucle principale
         // Copie l'ensemble des sockets puisque select() modifie l'ensemble surveillé
-        read_fds = all_sockets;
+        copy_read_fds = read_fds;
+        copy_write_fds = write_fds;
         // Timeout de 2 secondes pour select()
         timer.tv_sec = 2;
         timer.tv_usec = 0;
 
         // Surveille les sockets prêtes à être lues
-        status = select(fd_max + 1, &read_fds, NULL, NULL, &timer);
+        status = select(fd_max + 1, &copy_read_fds, &copy_write_fds, NULL, &timer);
         if (status == -1) 
         {
             fprintf(stderr, "[Server] Select error: %s\n", strerror(errno));
@@ -91,21 +100,30 @@ int main(void)
         // Boucle sur nos sockets
         for (int i = 0; i <= fd_max; i++) 
         {
-            if (FD_ISSET(i, &read_fds)) 
+            if (FD_ISSET(i, &copy_read_fds)) 
             {
                 if (i == server_socket_1 || i == server_socket_2 || i == server_socket_3)
                 {
-                    accept_new_connection(i, &all_sockets, &fd_max);
+                    accept_new_connection(i, copy_read_fds, &fd_max);
                 } 
                 else
                 {
-                    read_data_from_socket(i, &all_sockets, &fd_max, server_socket_1);
+                    read_data_from_socket(i, copy_read_fds, &fd_max, server_socket_1, copy_write_fds);
                 }
+            }
+            if (FD_ISSET(i, &copy_write_fds)) 
+            {
+                // Envoyer un message de bienvenue au client
+                const char *welcome_message = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
+                send(i, welcome_message, strlen(welcome_message), 0);
+                close(i);
             }
         }
     }
     return (0);
 }
+
+
 
 // Renvoie la socket du serveur liée à l'adresse et au port qu'on veut écouter
 int create_server_socket(int port) 
@@ -148,8 +166,9 @@ int create_server_socket(int port)
     return (socket_fd);
 }
 
+
 // Accepte une nouvelle connexion et ajoute la nouvelle socket à l'ensemble des sockets
-void accept_new_connection(int listener_socket, fd_set *all_sockets, int *fd_max)
+void accept_new_connection(int listener_socket, fd_set &read_fds, int *fd_max)
 {
     int client_fd;
     struct sockaddr_in client_addr;
@@ -161,19 +180,21 @@ void accept_new_connection(int listener_socket, fd_set *all_sockets, int *fd_max
         fprintf(stderr, "[Server] Accept error: %s\n", strerror(errno));
         return ;
     }
-    FD_SET(client_fd, all_sockets); // Ajoute la socket client à l'ensemble
+    FD_SET(client_fd, &read_fds); // Ajoute la socket client à l'ensemble
     if (client_fd > *fd_max) 
     {
         *fd_max = client_fd; // Met à jour la plus grande socket
     }
     printf("[Server] Accepted new connection on client socket %d.\n", client_fd);
     // Envoyer un message de bienvenue au client
-    const char *welcome_message = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
-    send(client_fd, welcome_message, strlen(welcome_message), 0);
+    // const char *welcome_message = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
+    // send(client_fd, welcome_message, strlen(welcome_message), 0);
 }
 
+
+
 // Lit le message d'une socket et relaie le message à toutes les autres
-void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket)
+void read_data_from_socket(int socket, fd_set &read_fds, int *fd_max, int server_socket, fd_set &write_fds)
 {
     char buffer[BUFSIZ];
     int bytes_read;
@@ -191,6 +212,7 @@ void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int ser
             fprintf(stderr, "[Server] Recv error: %s\n", strerror(errno));
         }
         close(socket); // Ferme la socket
-        FD_CLR(socket, all_sockets); // Enlève la socket de l'ensemble
     }
+    FD_CLR(socket, &read_fds); // Enlève la socket de l'ensemble
+    FD_SET(socket, &write_fds); // Enlève la socket de l'ensemble
 }
