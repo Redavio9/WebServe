@@ -1,54 +1,69 @@
-// server.c - un petit serveur qui surveille ses sockets avec select() pour accepter des demandes de connexion et relaie les messages de ses clients
-#include <errno.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   socket_betta.cpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/02/21 11:35:08 by rarraji           #+#    #+#             */
+/*   Updated: 2024/02/21 11:49:36 by rarraji          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <unistd.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <vector> // Pour gérer plusieurs sockets
 
-#define PORT 8006  // le port de notre serveur
+#define PORT_1 8006  // le port de notre premier serveur
+#define PORT_2 8007  // le port de notre deuxième serveur
+#define PORT_3 8008  // le port de notre troisième serveur
 
-int create_server_socket(void);
+// Déclaration des fonctions
+int create_server_socket(int port);
 void accept_new_connection(int listener_socket, fd_set *all_sockets, int *fd_max);
 void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket);
 
 int main(void)
 {
     printf("---- SERVER ----\n\n");
-	
-    int server_socket;
+
     int status;
 
     // Pour surveiller les sockets clients :
     fd_set all_sockets; // Ensemble de toutes les sockets du serveur
     fd_set read_fds;    // Ensemble temporaire pour select()
-    int fd_max = 0;         // Descripteur de la plus grande socket
+    int fd_max = 0;     // Descripteur de la plus grande socket
     struct timeval timer;
 
-    // Création de la socket du serveur
-    server_socket = create_server_socket();
-    if (server_socket == -1) 
-    {
-        return (1);
-    }
+    // Création des sockets serveurs
+    int server_socket_1 = create_server_socket(PORT_1);
+    int server_socket_2 = create_server_socket(PORT_2);
+    int server_socket_3 = create_server_socket(PORT_3);
 
-    // Écoute du port via la socket
-    printf("[Server] Listening on port %d\n", PORT);
-    status = listen(server_socket, 10);
-    if (status != 0) 
+    if (server_socket_1 == -1 || server_socket_2 == -1 || server_socket_3 == -1) 
     {
-        fprintf(stderr, "[Server] Listen error: %s\n", strerror(errno));
-        return (3);
+        return 1;
     }
 
     // Préparation des ensembles de sockets pour select()
     FD_ZERO(&all_sockets);
     FD_ZERO(&read_fds);
-    FD_SET(server_socket, &all_sockets); // Ajout de la socket principale à l'ensemble
-    fd_max = server_socket; // Le descripteur le plus grand est forcément celui de notre seule socket
+    FD_SET(server_socket_1, &all_sockets); // Ajout de la première socket serveur à l'ensemble
+    FD_SET(server_socket_2, &all_sockets); // Ajout de la deuxième socket serveur à l'ensemble
+    FD_SET(server_socket_3, &all_sockets); // Ajout de la troisième socket serveur à l'ensemble
+
+    // Trouver le descripteur de fichier maximum
+    fd_max = std::max(server_socket_1, std::max(server_socket_2, server_socket_3));
+
     printf("[Server] Set up select fd sets\n");
 
     while (1) 
@@ -58,7 +73,7 @@ int main(void)
         // Timeout de 2 secondes pour select()
         timer.tv_sec = 2;
         timer.tv_usec = 0;
-		
+
         // Surveille les sockets prêtes à être lues
         status = select(fd_max + 1, &read_fds, NULL, NULL, &timer);
         if (status == -1) 
@@ -76,42 +91,24 @@ int main(void)
         // Boucle sur nos sockets
         for (int i = 0; i <= fd_max; i++) 
         {
-           if (FD_ISSET(i, &read_fds)) 
-           {
-                if (i == server_socket)
+            if (FD_ISSET(i, &read_fds)) 
+            {
+                if (i == server_socket_1 || i == server_socket_2 || i == server_socket_3)
                 {
-                    accept_new_connection(server_socket, &all_sockets, &fd_max);
+                    accept_new_connection(i, &all_sockets, &fd_max);
                 } 
                 else
                 {
-                    read_data_from_socket(i, &all_sockets, &fd_max, server_socket);
+                    read_data_from_socket(i, &all_sockets, &fd_max, server_socket_1);
                 }
             }
-            // if (FD_ISSET(i, &read_fds) != 1) 
-            // {
-            //     // Le fd i n'est pas une socket à surveiller
-            //     // on s'arrête là et on continue la boucle
-            //     continue ;
-            // }
-            // printf("[%d] Ready for I/O operation\n", i);
-            // // La socket est prête à être lue !
-            // if (i == server_socket) 
-            // {
-            //     // La socket est notre socket serveur qui écoute le port
-            //     accept_new_connection(server_socket, &all_sockets, &fd_max);
-            // }
-            // else 
-            // {
-            //     // La socket est une socket client, on va la lire
-            //     read_data_from_socket(i, &all_sockets, fd_max, server_socket);
-            // }
         }
     }
     return (0);
 }
 
 // Renvoie la socket du serveur liée à l'adresse et au port qu'on veut écouter
-int create_server_socket(void) 
+int create_server_socket(int port) 
 {
     struct sockaddr_in sa;
     int socket_fd;
@@ -121,7 +118,7 @@ int create_server_socket(void)
     memset(&sa, 0, sizeof sa);
     sa.sin_family = AF_INET; // IPv4
     sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // 127.0.0.1, localhost
-    sa.sin_port = htons(PORT);
+    sa.sin_port = htons(port);
 
     // Création de la socket
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -139,19 +136,26 @@ int create_server_socket(void)
         fprintf(stderr, "[Server] Bind error: %s\n", strerror(errno));
         return (-1);
     }
-    printf("[Server] Bound socket to localhost port %d\n", PORT);
+    printf("[Server] Bound socket to localhost port %d\n", port);
+    // Mise en écoute de la socket
+    status = listen(socket_fd, 10);
+    if (status != 0) 
+    {
+        fprintf(stderr, "[Server] Listen error: %s\n", strerror(errno));
+        return (-1);
+    }
+    printf("[Server] Listening on port %d\n", port);
     return (socket_fd);
 }
 
 // Accepte une nouvelle connexion et ajoute la nouvelle socket à l'ensemble des sockets
-void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max)
+void accept_new_connection(int listener_socket, fd_set *all_sockets, int *fd_max)
 {
     int client_fd;
-    char msg_to_send[BUFSIZ];
-    char response[BUFSIZ];
-    int status;
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(client_addr);
 
-    client_fd = accept(server_socket, NULL, NULL);
+    client_fd = accept(listener_socket, (struct sockaddr *)&client_addr, &client_addr_len);
     if (client_fd == -1) 
     {
         fprintf(stderr, "[Server] Accept error: %s\n", strerror(errno));
@@ -163,24 +167,16 @@ void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max)
         *fd_max = client_fd; // Met à jour la plus grande socket
     }
     printf("[Server] Accepted new connection on client socket %d.\n", client_fd);
-    memset(&msg_to_send, '\0', sizeof msg_to_send);
-    // sprintf(msg_to_send, "Welcome. You are client fd [%d]\n", client_fd);
-    sprintf(response, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>");
-
-    status = send(client_fd, response, strlen(response), 0);
-    if (status == -1) 
-    {
-        fprintf(stderr, "[Server] Send error to client %d: %s\n", client_fd, strerror(errno));
-    }
+    // Envoyer un message de bienvenue au client
+    const char *welcome_message = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
+    send(client_fd, welcome_message, strlen(welcome_message), 0);
 }
 
 // Lit le message d'une socket et relaie le message à toutes les autres
 void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket)
 {
     char buffer[BUFSIZ];
-    char msg_to_send[BUFSIZ];
     int bytes_read;
-    int status;
 
     memset(&buffer, '\0', sizeof buffer);
     bytes_read = recv(socket, buffer, BUFSIZ, 0);
@@ -198,5 +194,3 @@ void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int ser
         FD_CLR(socket, all_sockets); // Enlève la socket de l'ensemble
     }
 }
-
-
