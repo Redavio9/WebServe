@@ -1,0 +1,20 @@
+server:
+	port: "1337"
+	host: "10.0.0.1"
+	root: "www"
+	server_name: ["example.com"]
+	location:
+		prefix: "/example.html"
+    allowed_methods : ["GET" ,"POST", "DELETE"]
+    error_page : ["404", "www/error_pages/404.html"]
+    redirect : ["old_about.html", "about.html"]
+server:
+	port: "1339"
+	host: "10.0.16.2"
+	root: "www"
+	server_name: ["example1.com"]
+	location:
+		prefix: "/example1.html"
+    allowed_methods : ["GET" ,"POST", "DELETE"]
+    error_page : ["404", "www/error_pages/404.html"]
+    redirect : ["old_about.html", "about.html"]
