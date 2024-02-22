@@ -6,11 +6,12 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 11:35:08 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/21 13:21:26 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/22 09:25:02 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+#include <sstream>
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
@@ -22,17 +23,31 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <vector> // Pour gérer plusieurs sockets
+#include <map> 
 
 #define PORT_1 8006  // le port de notre premier serveur
 #define PORT_2 8007  // le port de notre deuxième serveur
 #define PORT_3 8008  // le port de notre troisième serveur
 
+// parametre req
+typedef struct param_req
+{
+  std::string path;
+  std::string version_http;
+  std::string ip;
+  std::string port;
+} param_req;
+
+
+
 // Déclaration des fonctions
 int create_server_socket(int port);
 // void accept_new_connection(int listener_socket, fd_set *all_sockets, int *fd_max);
-// void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket);
 void accept_new_connection(int listener_socket, fd_set &read_fds, int *fd_max);
+// void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket);
 void read_data_from_socket(int socket, fd_set &read_fds, int *fd_max, int server_socket, fd_set &write_fds);
+// parse req
+void parse_req(std::string buffer);
 
 int main(void)
 {
@@ -201,6 +216,10 @@ void read_data_from_socket(int socket, fd_set &read_fds, int *fd_max, int server
 
     memset(&buffer, '\0', sizeof buffer);
     bytes_read = recv(socket, buffer, BUFSIZ, 0);
+    std::cout << "---------------------------------------------------------\n" << std::endl;
+    std::cout << buffer << std::endl;
+    std::cout << "---------------------------------------------------------\n" << std::endl;
+    parse_req(buffer);
     if (bytes_read <= 0) 
     {
         if (bytes_read == 0) 
@@ -216,3 +235,59 @@ void read_data_from_socket(int socket, fd_set &read_fds, int *fd_max, int server
     FD_CLR(socket, &read_fds); // Enlève la socket de l'ensemble
     FD_SET(socket, &write_fds); // Enlève la socket de l'ensemble
 }
+
+
+void parse_req(std::string buffer)
+{
+        std::stringstream ss(buffer);
+        std::string str;
+        int i = 0;
+        int cnt = 0;
+        param_req param_req;
+        
+        while(getline(ss, str, '\n'))
+        {
+            std::map<std::string, std::string> MyMap;
+            int j = str.find(' ');
+            std::string key;
+            std::string value;
+            key = str.substr(0,j);
+            value = str.substr(j,str.length());
+            MyMap[key] = value;
+            if (i == 0)
+            {
+                std::stringstream ss(value);
+                std::string buffer;
+                while(getline(ss, buffer, ' '))
+                {
+                if (cnt == 1)
+                    param_req.path = buffer;
+                if (cnt == 2)
+                    param_req.version_http = buffer;
+                cnt++;
+                }
+            }
+            if (i == 1)
+            {
+                cnt = 0;
+                std::stringstream ss(value);
+                std::string buffer;
+                getline(ss, buffer, ' ');
+                while(getline(ss, buffer, ':'))
+                {
+                if (cnt == 0)
+                    param_req.ip = buffer;
+                if (cnt == 1)
+                    param_req.port = buffer;
+                cnt++;
+                }
+            }
+
+            if(i == 7)
+                break;
+            i++;
+        }
+        std::cout << "ip  : " << param_req.ip << std::endl << "port  : " << param_req.port << std::endl;
+        std::cout << "path  : " << param_req.path << std::endl << "version_http  : " << param_req.version_http << std::endl;
+}
+
