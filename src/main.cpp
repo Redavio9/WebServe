@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/22 10:20:00 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/24 09:45:31 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/24 12:24:48 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,11 @@ int main() {
 
     if (server_socket_1 == -1 || server_socket_2 == -1 || server_socket_3 == -1) 
         return 1;
-
+    int nbr;    
+    for (int i = 3; i < 6; ++i)
+		setsockopt(i, SOL_SOCKET, SO_REUSEADDR, &nbr, sizeof(nbr));    
+    server.SetFdMax(server_socket_1, server_socket_2, server_socket_3);    
+    // server. = std::max(server_socket_1, std::max(server_socket_2, server_socket_3));
     // Main loop
     struct timeval timer;
     while (true) 
@@ -37,9 +41,10 @@ int main() {
         timer.tv_sec = 2;
         timer.tv_usec = 0;
         
-        int status = select(7, &server.copy_read_fds, &server.copy_write_fds, NULL, &timer);
+        int status = select(server.get_fdMax() + 1, &server.copy_read_fds, &server.copy_write_fds, NULL, &timer);
 
-        if (status == -1) {
+        if (status == -1) 
+        {
             fprintf(stderr, "[Server] Select error: %s\n", strerror(errno));
             exit(1);
         }

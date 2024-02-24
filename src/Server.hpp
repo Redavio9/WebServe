@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/22 09:46:46 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/23 12:44:18 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/24 12:06:46 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ typedef struct param_req {
 class MyServer {
 private:
     std::map<std::string, std::string> MyMap;
-    param_req param_req;
+    param_req param_req_one;
     std::string buffer;
     int fd_max;
 
@@ -52,11 +52,13 @@ public:
     void SetFdToZero();
     void loopOverSockets(int server_socket_1, int server_socket_2, int server_socket_3);
     int create_server_socket(int port);
-    void accept_new_connection(int listener_socket, int *fd_max);
+    void accept_new_connection(int listener_socket);
     void read_data_from_socket(int socket);
     void parse_req(std::string buffer);
+    int &get_fdMax();
     void set_copy_read_fds();
     void set_copy_write_fds();
+    void SetFdMax(int server_socket_1, int server_socket_2, int server_socket_3);
     fd_set* get_copy_read_fds();
     fd_set* get_copy_write_fds();
 };
