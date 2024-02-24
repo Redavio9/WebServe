@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 11:35:08 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/22 09:25:02 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/23 12:57:05 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,11 +95,11 @@ int main(void)
         copy_read_fds = read_fds;
         copy_write_fds = write_fds;
         // Timeout de 2 secondes pour select()
-        timer.tv_sec = 2;
+        timer.tv_sec = 0;
         timer.tv_usec = 0;
 
         // Surveille les sockets prêtes à être lues
-        status = select(fd_max + 1, &copy_read_fds, &copy_write_fds, NULL, &timer);
+        status = select(fd_max + 1, &copy_read_fds, &copy_write_fds, NULL, NULL);
         if (status == -1) 
         {
             fprintf(stderr, "[Server] Select error: %s\n", strerror(errno));
