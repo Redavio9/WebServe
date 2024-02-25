@@ -6,14 +6,14 @@
 #    By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/22 10:15:25 by rarraji           #+#    #+#              #
-#    Updated: 2024/02/23 12:51:36 by rarraji          ###   ########.fr        #
+#    Updated: 2024/02/24 19:36:36 by rarraji          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME    = Server
 
 CC      = c++
-FLAGS   = -Wall -Wextra -Werror -std=c++98
+# FLAGS   = -Wall -Wextra -Werror -std=c++98
 RM      = rm -rf
 SRC     = Server.cpp main.cpp
 OBJ     = $(SRC:.cpp=.o) 

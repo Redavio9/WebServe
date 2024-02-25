@@ -6,9 +6,12 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/22 09:46:46 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/23 12:44:18 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/24 19:53:24 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 #include <iostream>
 #include <sstream>
@@ -22,41 +25,35 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#include <vector>
+#include <vector> // Pour gérer plusieurs sockets
 #include <map>
 
-#define PORT_1 8006
-#define PORT_2 8007
-#define PORT_3 8008
+#define PORT_1  8006  // le port de notre premier serveur
+#define PORT_2  8007  // le port de notre deuxième serveur
+#define PORT_3  8008  // le port de notre troisième serveur
 
-typedef struct param_req {
-    std::string path;
-    std::string version_http;
-    std::string ip;
-    std::string port;
+// paramètre req
+typedef struct param_req
+{
+  std::string path;
+  std::string version_http;
+  std::string ip;
+  std::string port;
 } param_req;
 
-class MyServer {
-private:
-    std::map<std::string, std::string> MyMap;
-    param_req param_req;
-    std::string buffer;
-    int fd_max;
-
+class Server {
 public:
-    fd_set read_fds;
-    fd_set write_fds;
-    fd_set copy_read_fds;
-    fd_set copy_write_fds;
-    MyServer();
-    void SetFdToZero();
-    void loopOverSockets(int server_socket_1, int server_socket_2, int server_socket_3);
+    Server();
+    ~Server();
+    void run();
+
+private:
     int create_server_socket(int port);
-    void accept_new_connection(int listener_socket, int *fd_max);
-    void read_data_from_socket(int socket);
+    void accept_new_connection(int listener_socket, fd_set &read_fds, int &fd_max);
+    void read_data_from_socket(int socket, fd_set &read_fds, int &fd_max, int server_socket, fd_set &write_fds);
     void parse_req(std::string buffer);
-    void set_copy_read_fds();
-    void set_copy_write_fds();
-    fd_set* get_copy_read_fds();
-    fd_set* get_copy_write_fds();
+
+    int server_socket_1, server_socket_2, server_socket_3;
 };
+
+#endif // SERVER_HPP

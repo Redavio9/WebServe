@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 11:35:08 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/23 12:57:05 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/24 19:29:07 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,9 @@ typedef struct param_req
 // Déclaration des fonctions
 int create_server_socket(int port);
 // void accept_new_connection(int listener_socket, fd_set *all_sockets, int *fd_max);
-void accept_new_connection(int listener_socket, fd_set &read_fds, int *fd_max);
+void accept_new_connection(int listener_socket, fd_set read_fds, int *fd_max);
 // void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket);
-void read_data_from_socket(int socket, fd_set &read_fds, int *fd_max, int server_socket, fd_set &write_fds);
+void read_data_from_socket(int socket, fd_set read_fds, int *fd_max, int server_socket, fd_set write_fds);
 // parse req
 void parse_req(std::string buffer);
 
@@ -95,11 +95,11 @@ int main(void)
         copy_read_fds = read_fds;
         copy_write_fds = write_fds;
         // Timeout de 2 secondes pour select()
-        timer.tv_sec = 0;
+        timer.tv_sec = 2;
         timer.tv_usec = 0;
 
         // Surveille les sockets prêtes à être lues
-        status = select(fd_max + 1, &copy_read_fds, &copy_write_fds, NULL, NULL);
+        status = select(fd_max + 1, &copy_read_fds, &copy_write_fds, NULL, &timer);
         if (status == -1) 
         {
             fprintf(stderr, "[Server] Select error: %s\n", strerror(errno));
@@ -183,7 +183,7 @@ int create_server_socket(int port)
 
 
 // Accepte une nouvelle connexion et ajoute la nouvelle socket à l'ensemble des sockets
-void accept_new_connection(int listener_socket, fd_set &read_fds, int *fd_max)
+void accept_new_connection(int listener_socket, fd_set read_fds, int *fd_max)
 {
     int client_fd;
     struct sockaddr_in client_addr;
@@ -209,7 +209,7 @@ void accept_new_connection(int listener_socket, fd_set &read_fds, int *fd_max)
 
 
 // Lit le message d'une socket et relaie le message à toutes les autres
-void read_data_from_socket(int socket, fd_set &read_fds, int *fd_max, int server_socket, fd_set &write_fds)
+void read_data_from_socket(int socket, fd_set read_fds, int *fd_max, int server_socket, fd_set write_fds)
 {
     char buffer[BUFSIZ];
     int bytes_read;
