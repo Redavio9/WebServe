@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/25 16:12:19 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/25 19:48:27 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,29 +188,38 @@ void Server::run()
         {
             std::cerr << "[Server] Select error: " << strerror(errno) << std::endl;
             return;
-        } else if (status ==  0) 
-        {
+        } else if (status ==  0) {
             std::cout << "[Server] Waiting...\n";
             continue;
         }
 
-        for (int i =  0; i <= fd_max; i++) 
-        {
-            if (FD_ISSET(i, &copy_read_fds))
-            {
-                if (i == server_socket_1 || i == server_socket_2 || i == server_socket_3) 
-                {
+        for (int i =  0; i <= fd_max; i++) {
+            if (FD_ISSET(i, &copy_read_fds)) {
+                if (i == server_socket_1 || i == server_socket_2 || i == server_socket_3) {
                     accept_new_connection(i, copy_read_fds, &fd_max);
-                } else 
-                {
+                } else {
                     read_data_from_socket(i, copy_read_fds, copy_write_fds);
                 }
             }
             if (FD_ISSET(i, &copy_write_fds)) 
             {
-                // Envoi d'un message de bienvenue au client
-                const char *welcome_message = "HTTP/1.1  200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
-                send(i, welcome_message, strlen(welcome_message),  0);
+                // // Envoi d'un message de bienvenue au client
+                // const char *welcome_message = "HTTP/1.1  200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
+                // send(i, welcome_message, strlen(welcome_message),  0);
+                std::ifstream file("./pages/index.html");
+                if (!file.is_open()) {
+                    std::cerr << "[Server] Impossible d'ouvrir le fichier '" << "\n";
+                    return;
+                }
+
+                // // Envoi du contenu du fichier via la socket
+                std::stringstream buffer;
+                buffer << file.rdbuf();
+                file.close();
+
+                // Envoi du contenu du fichier via la socket
+                std::string response = buffer.str();
+                send(i, response.c_str(), response.size(),   0);
                 close(i);
             }
         }

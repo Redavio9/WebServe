@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:14 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/25 16:14:08 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/25 19:43:05 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #include <errno.h>
 #include <vector> // Pour gérer plusieurs sockets
 #include <map>   
+#include <fstream> 
 
 #define PORT_1   8006  // le port de notre premier serveur
 #define PORT_2   8007  // le port de notre deuxième serveur
