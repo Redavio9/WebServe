@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/26 10:10:28 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/26 10:51:15 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,9 +127,9 @@ void Server::parse_req(std::string buffer)
             while(getline(ss, buffer, ' ')) 
             {
                 if (cnt ==   1)
-                    param_req.path = buffer;
+                    param_req_one.path = buffer;
                 if (cnt ==   2)
-                    param_req.version_http = buffer;
+                    param_req_one.version_http = buffer;
                 cnt++;
             }
         }
@@ -142,9 +142,9 @@ void Server::parse_req(std::string buffer)
             while(getline(ss, buffer, ':')) 
             {
                 if (cnt ==   0)
-                    param_req.ip = buffer;
+                    param_req_one.ip = buffer;
                 if (cnt ==   1)
-                    param_req.port = buffer;
+                    param_req_one.port = buffer;
                 cnt++;
             }
         }
@@ -152,8 +152,8 @@ void Server::parse_req(std::string buffer)
             break;
         i++;
     }
-    std::cout << "ip  : " << param_req.ip << std::endl << "port  : " << param_req.port << std::endl;
-    std::cout << "path  : " << param_req.path << std::endl << "version_http  : " << param_req.version_http << std::endl;
+    std::cout << "ip  : " << param_req_one.ip << std::endl << "port  : " << param_req_one.port << std::endl;
+    std::cout << "path  : " << param_req_one.path << std::endl << "version_http  : " << param_req_one.version_http << std::endl;
 }
 
 void Server::run() 
@@ -204,19 +204,19 @@ void Server::run()
             if (FD_ISSET(i, &copy_write_fds)) 
             {
                 // std::cout << "---->" << " ip  : " << param_req.ip << std::endl << "port  : " << param_req.port << std::endl;
-                std::string test = "/";
-                std::string test1 = "/favicon.ico";
+                // std::string test = "/";
+                // std::string test1 = "/favicon.ico";
                 std::string path = "./pages";
                 std::string new_path = "./pages";
                 
-                if (param_req.path.compare(test) == 0 || param_req.path.compare(test1) == 0)
-                    param_req.path = "/index";
-                new_path = path + param_req.path + ".html";
+                if (param_req_one.path.compare("/home") != 0)
+                    param_req_one.path = "/index";
+                new_path = path + param_req_one.path + ".html";
                 std::cout << new_path << std::endl;
                 // // Envoi d'un message de bienvenue au client
                 // const char *welcome_message = "HTTP/1.1  200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
                 // send(i, welcome_message, strlen(welcome_message),  0);
-                std::ifstream file(new_path);
+                std::ifstream file(new_path.c_str());
                 if (!file.is_open()) {
                     std::cerr << "[Server] Impossible d'ouvrir le fichier '" << "\n";
                     return;

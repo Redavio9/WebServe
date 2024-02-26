@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:14 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/26 09:59:21 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/26 10:32:15 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ class Server
     int server_socket_1;
     int server_socket_2;
     int server_socket_3;
-    param_req param_req;
+    param_req param_req_one;
     int create_server_socket(int port);
     void accept_new_connection(int listener_socket, fd_set &read_fds, int *fd_max);
     void read_data_from_socket(int socket, fd_set &read_fds, fd_set &write_fds);

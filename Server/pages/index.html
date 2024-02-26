@@ -1,55 +1,75 @@
 HTTP/1.1   200 OK
 Content-Type: text/html
+Content-Type: image/png
+<!-- Content-Type: image/jpg -->
 
-<html lang="en">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exemple de Page</title>
+    <title>Informations sur les étudiants</title>
     <style>
-        body 
-        {
+        body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin:   0;
-            padding:   0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height:  100vh;
+            margin:  0;
         }
-        .container 
-        {
-            width:   80%;
-            margin: auto;
-            padding:   20px;
+
+        .student-info {
+            display: flex;
+            justify-content: space-around;
+            width:  80%;
         }
-        h1 {
-            color: #333;
+
+        .student-card {
+            background-color: #fff;
+            border-radius:  10px;
+            box-shadow:  0  4px  8px rgba(0,  0,  0,  0.1);
+            transition: transform  0.3s ease-in-out;
+            width:  300px;
             text-align: center;
+            padding:  20px;
         }
-        p {
+
+        .student-card:hover {
+            transform: scale(1.05);
+        }
+
+        .student-card img {
+            max-width:  100%;
+            height: auto;
+            display: block; 
+            margin:  0 auto; 
+            border-radius:  50%;
+        }
+
+        .student-card h2 {
+            margin-top:  10px;
+            color: #333;
+        }
+
+        .student-card p {
             color: #666;
-            font-size:   18px;
-            line-height:   1.6;
-        }
-        button {
-            display: block;
-            width:   100px;
-            height:   40px;
-            margin:   20px auto;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius:   5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Bienvenue sur notre page d'exemple INDEX</h1>
-        <p>Ceci est un exemple simple de page HTML avec du style CSS intégré. Vous pouvez modifier le contenu et le style selon vos besoins.</p>
-        <button>Cliquez   ici</button>
+    <div class="student-info">
+        <div class="student-card">
+            <img src="./rarraji.png" alt="Solix" width="600" height="400">
+            <h2>rarraji</h2>
+            <p>Informations sur l'étudiant  ...</p>
+        </div>
+        <div class="student-card">
+            <img src="./bel-kdio.jpg" alt="Pedro" width="600" height="400">
+            <h2>bel-kdio</h2>
+            <p>Informations sur l'étudiant  ...</p>
+        </div>
     </div>
 </body>
 </html>
