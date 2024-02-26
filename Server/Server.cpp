@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/25 16:12:19 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/26 10:10:28 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ void Server::parse_req(std::string buffer)
     std::string str;
     int i =   0;
     int cnt =   0;
-    param_req param_req;
+    // param_req param_req;
 
     while(getline(ss, str, '\n')) 
     {
@@ -188,29 +188,48 @@ void Server::run()
         {
             std::cerr << "[Server] Select error: " << strerror(errno) << std::endl;
             return;
-        } else if (status ==  0) 
-        {
+        } else if (status ==  0) {
             std::cout << "[Server] Waiting...\n";
             continue;
         }
 
-        for (int i =  0; i <= fd_max; i++) 
-        {
-            if (FD_ISSET(i, &copy_read_fds))
-            {
-                if (i == server_socket_1 || i == server_socket_2 || i == server_socket_3) 
-                {
+        for (int i =  0; i <= fd_max; i++) {
+            if (FD_ISSET(i, &copy_read_fds)) {
+                if (i == server_socket_1 || i == server_socket_2 || i == server_socket_3) {
                     accept_new_connection(i, copy_read_fds, &fd_max);
-                } else 
-                {
+                } else {
                     read_data_from_socket(i, copy_read_fds, copy_write_fds);
                 }
             }
             if (FD_ISSET(i, &copy_write_fds)) 
             {
-                // Envoi d'un message de bienvenue au client
-                const char *welcome_message = "HTTP/1.1  200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
-                send(i, welcome_message, strlen(welcome_message),  0);
+                // std::cout << "---->" << " ip  : " << param_req.ip << std::endl << "port  : " << param_req.port << std::endl;
+                std::string test = "/";
+                std::string test1 = "/favicon.ico";
+                std::string path = "./pages";
+                std::string new_path = "./pages";
+                
+                if (param_req.path.compare(test) == 0 || param_req.path.compare(test1) == 0)
+                    param_req.path = "/index";
+                new_path = path + param_req.path + ".html";
+                std::cout << new_path << std::endl;
+                // // Envoi d'un message de bienvenue au client
+                // const char *welcome_message = "HTTP/1.1  200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
+                // send(i, welcome_message, strlen(welcome_message),  0);
+                std::ifstream file(new_path);
+                if (!file.is_open()) {
+                    std::cerr << "[Server] Impossible d'ouvrir le fichier '" << "\n";
+                    return;
+                }
+
+                // // Envoi du contenu du fichier via la socket
+                std::stringstream buffer;
+                buffer << file.rdbuf();
+                file.close();
+
+                // Envoi du contenu du fichier via la socket
+                std::string response = buffer.str();
+                send(i, response.c_str(), response.size(),   0);
                 close(i);
             }
         }
