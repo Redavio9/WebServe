@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/27 15:43:55 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/27 20:47:57 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ void Server::accept_new_connection(int listener_socket, fd_set &read_fds, int *f
 
 void Server::read_data_from_socket(int socket, fd_set &read_fds, fd_set &write_fds) 
 {
-    char buffer[BUFSIZ];
+    char buffer[10240];
     int bytes_read;
 
     memset(&buffer, '\0', sizeof buffer);
