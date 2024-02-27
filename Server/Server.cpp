@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/27 12:18:53 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/27 12:53:08 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,6 +214,8 @@ void Server::run()
                     param_req_one.path = "/home";
                 if (param_req_one.path.compare("/") == 0)
                     param_req_one.path = "/index";
+                if (param_req_one.path.compare("/upload") == 0)
+                    param_req_one.path = "/upload";
                 if (param_req_one.path.compare("/images/rarraji.jpg") == 0)
                     param_req_one.path = "./images/rarraji.jpg";
                 if (param_req_one.path.compare("/images/bel-kdio.jpg") == 0)
