@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/26 10:51:15 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/26 21:41:05 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,14 +211,22 @@ void Server::run()
                 
                 if (param_req_one.path.compare("/home") != 0)
                     param_req_one.path = "/index";
+                if (param_req_one.path.compare("/rarraji.png") != 0)
+                    param_req_one.path = "../rarraji.png";
+                if (param_req_one.path.compare("/bel-kdio.jpg") != 0)
+                    param_req_one.path = "/Users/rarraji/Desktop/WebServ/Server/bel-kdio.jpg";
+                if (param_req_one.path.compare("/rarraji.png") == 0 && param_req_one.path.compare("/bel-kdio.jpg") == 0)    
                 new_path = path + param_req_one.path + ".html";
+                else
+                    new_path = param_req_one.path; 
+                    
                 std::cout << new_path << std::endl;
                 // // Envoi d'un message de bienvenue au client
                 // const char *welcome_message = "HTTP/1.1  200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
                 // send(i, welcome_message, strlen(welcome_message),  0);
-                std::ifstream file(new_path.c_str());
+                std::ifstream file(new_path.c_str(), std::ios::binary);
                 if (!file.is_open()) {
-                    std::cerr << "[Server] Impossible d'ouvrir le fichier '" << "\n";
+                    std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
                     return;
                 }
 
@@ -228,7 +236,14 @@ void Server::run()
                 file.close();
 
                 // Envoi du contenu du fichier via la socket
-                std::string response = buffer.str();
+                // HTTP/1.1   200 OK
+                // Content-Type: text/html
+
+                std::string response;
+                response = "HTTP/1.1 200 OK\r\n";
+                response += "Content-Type: image/jpg\r\n";
+                response += "\r\n";
+                response += buffer.str();
                 send(i, response.c_str(), response.size(),   0);
                 close(i);
             }
