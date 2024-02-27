@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/26 21:41:05 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/27 12:18:53 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,42 +206,75 @@ void Server::run()
                 // std::cout << "---->" << " ip  : " << param_req.ip << std::endl << "port  : " << param_req.port << std::endl;
                 // std::string test = "/";
                 // std::string test1 = "/favicon.ico";
-                std::string path = "./pages";
+                // std::string path = "./pages";
                 std::string new_path = "./pages";
+                std::cout << "----> " << param_req_one.path << std::endl;    
                 
-                if (param_req_one.path.compare("/home") != 0)
+                if (param_req_one.path.compare("/home") == 0)
+                    param_req_one.path = "/home";
+                if (param_req_one.path.compare("/") == 0)
                     param_req_one.path = "/index";
-                if (param_req_one.path.compare("/rarraji.png") != 0)
-                    param_req_one.path = "../rarraji.png";
-                if (param_req_one.path.compare("/bel-kdio.jpg") != 0)
-                    param_req_one.path = "/Users/rarraji/Desktop/WebServ/Server/bel-kdio.jpg";
-                if (param_req_one.path.compare("/rarraji.png") == 0 && param_req_one.path.compare("/bel-kdio.jpg") == 0)    
-                new_path = path + param_req_one.path + ".html";
+                if (param_req_one.path.compare("/images/rarraji.jpg") == 0)
+                    param_req_one.path = "./images/rarraji.jpg";
+                if (param_req_one.path.compare("/images/bel-kdio.jpg") == 0)
+                    param_req_one.path = "./images/bel-kdio.jpg";
+                if (param_req_one.path.compare("/images/maxresdefault.jpg") == 0)
+                    param_req_one.path = "./images/maxresdefault.jpg";    
+                if (param_req_one.path.compare("./images/rarraji.jpg") != 0 && param_req_one.path.compare("./images/bel-kdio.jpg") != 0 && param_req_one.path.compare("./images/maxresdefault.jpg"))
+                {
+                    
+                    new_path += param_req_one.path + ".html";
+                    std::cout << "HERE2\n";
+                }   
                 else
-                    new_path = param_req_one.path; 
+                {
+                    new_path = param_req_one.path;
+                    std::cout << "HERE1\n";
+                }
                     
                 std::cout << new_path << std::endl;
                 // // Envoi d'un message de bienvenue au client
                 // const char *welcome_message = "HTTP/1.1  200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
                 // send(i, welcome_message, strlen(welcome_message),  0);
-                std::ifstream file(new_path.c_str(), std::ios::binary);
-                if (!file.is_open()) {
-                    std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
-                    return;
-                }
+               
 
                 // // Envoi du contenu du fichier via la socket
-                std::stringstream buffer;
-                buffer << file.rdbuf();
-                file.close();
 
                 // Envoi du contenu du fichier via la socket
                 // HTTP/1.1   200 OK
                 // Content-Type: text/html
 
                 std::string response;
+                std::stringstream buffer;
                 response = "HTTP/1.1 200 OK\r\n";
-                response += "Content-Type: image/jpg\r\n";
+                if (new_path.compare("./images/rarraji.jpg") == 0 || new_path.compare("./images/bel-kdio.jpg") == 0 || new_path.compare("/images/maxresdefault.jpg") == 0)
+                {
+                    std::cout << "here!\n";
+                    std::ifstream file(new_path.c_str(), std::ios::binary);
+                    if (!file.is_open()) 
+                    {
+                        std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
+                        return;
+                    }
+                   
+                    buffer << file.rdbuf();
+                    file.close();
+                    response += "Content-Type: image/jpg\r\n";
+                }
+                else
+                {
+                    std::cout << "here9!\n";
+                    std::ifstream file(new_path.c_str());
+                    if (!file.is_open()) 
+                    {
+                        std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
+                        return;
+                    }
+                    buffer << file.rdbuf();
+                    file.close();
+                    response += "Content-Type: text/html\r\n";                    
+                }
+                    
                 response += "\r\n";
                 response += buffer.str();
                 send(i, response.c_str(), response.size(),   0);

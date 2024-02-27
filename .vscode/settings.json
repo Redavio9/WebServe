@@ -106,5 +106,6 @@
     "stdexcept": "cpp",
     "streambuf": "cpp",
     "typeinfo": "cpp"
-  }
+  },
+  "DockerRun.DisableDockerrc": true
 }

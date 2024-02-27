@@ -7,12 +7,30 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-image: url('../images/maxresdefault.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height:  100vh;
             margin:  0;
+            padding:  20px;
+        }
+
+        h1 {
+            color: #c0a9a9;
+            text-align: center;
+            margin-bottom:  50px;
+            animation: blink  1s infinite; /* Ajout de l'animation */
+        }
+
+        @keyframes blink {
+            0% { opacity:  1; }
+            50% { opacity:  0; }
+            100% { opacity:  1; }
         }
 
         .student-info {
@@ -22,7 +40,7 @@
         }
 
         .student-card {
-            background-color: #fff;
+            background-color: transparent;
             border-radius:  10px;
             box-shadow:  0  4px  8px rgba(0,  0,  0,  0.1);
             transition: transform  0.3s ease-in-out;
@@ -38,14 +56,14 @@
         .student-card img {
             max-width:  100%;
             height: auto;
-            display: block; 
-            margin:  0 auto; 
+            display: block;
+            margin:  0 auto;
             border-radius:  50%;
         }
 
         .student-card h2 {
             margin-top:  10px;
-            color: #333;
+            color: #ffffff;
         }
 
         .student-card p {
@@ -54,16 +72,17 @@
     </style>
 </head>
 <body>
+    <h1>WEB SERVE !!</h1>
     <div class="student-info">
         <div class="student-card">
-            <img src="../rarraji.png" alt="Solix" width="800" height="600">
+            <img src="../images/rarraji.jpg" alt="Solix" width="1000" height="800">
             <h2>rarraji</h2>
-            <p>Informations sur l'étudiant  ...</p>
+            <p>https://github.com/Redavio9</p>
         </div>
         <div class="student-card">
-            <img src="./bel-kdio.jpg" alt="Pedro" width="800" height="600">
+            <img src="../images/bel-kdio.jpg" alt="Pedro" width="1000" height="800">
             <h2>bel-kdio</h2>
-            <p>Informations sur l'étudiant  ...</p>
+            <p>https://github.com/belkdioui-111</p>
         </div>
     </div>
 </body>
