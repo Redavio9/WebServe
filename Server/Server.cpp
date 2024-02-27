@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/27 12:53:08 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/27 13:15:45 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,6 +212,8 @@ void Server::run()
                 
                 if (param_req_one.path.compare("/home") == 0)
                     param_req_one.path = "/home";
+                if (param_req_one.path.compare("/favicon.ico") == 0)
+                    param_req_one.path = "./images/rarraji.jpg";
                 if (param_req_one.path.compare("/") == 0)
                     param_req_one.path = "/index";
                 if (param_req_one.path.compare("/upload") == 0)
@@ -224,7 +226,6 @@ void Server::run()
                     param_req_one.path = "./images/maxresdefault.jpg";    
                 if (param_req_one.path.compare("./images/rarraji.jpg") != 0 && param_req_one.path.compare("./images/bel-kdio.jpg") != 0 && param_req_one.path.compare("./images/maxresdefault.jpg"))
                 {
-                    
                     new_path += param_req_one.path + ".html";
                     std::cout << "HERE2\n";
                 }   
@@ -256,7 +257,7 @@ void Server::run()
                     if (!file.is_open()) 
                     {
                         std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
-                        return;
+                        continue;
                     }
                    
                     buffer << file.rdbuf();
@@ -270,7 +271,7 @@ void Server::run()
                     if (!file.is_open()) 
                     {
                         std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
-                        return;
+                        continue;
                     }
                     buffer << file.rdbuf();
                     file.close();
