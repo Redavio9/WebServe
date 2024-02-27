@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/27 13:15:45 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/27 15:43:55 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,14 +118,17 @@ void Server::parse_req(std::string buffer)
         std::string key;
         std::string value;
         key = str.substr(0,j);
+        std::cout << "here ---> " << key << std::endl;
         value = str.substr(j,str.length());
         MyMap[key] = value;
-        if (i ==   0) 
+        if (i == 0) 
         {
             std::stringstream ss(value);
             std::string buffer;
             while(getline(ss, buffer, ' ')) 
             {
+                if (cnt == 0 && i == 0)
+                    param_req_one.methode = key;
                 if (cnt ==   1)
                     param_req_one.path = buffer;
                 if (cnt ==   2)
@@ -152,6 +155,7 @@ void Server::parse_req(std::string buffer)
             break;
         i++;
     }
+    std::cout << "methode  : " << param_req_one.methode << std::endl;
     std::cout << "ip  : " << param_req_one.ip << std::endl << "port  : " << param_req_one.port << std::endl;
     std::cout << "path  : " << param_req_one.path << std::endl << "version_http  : " << param_req_one.version_http << std::endl;
 }
@@ -188,16 +192,21 @@ void Server::run()
         {
             std::cerr << "[Server] Select error: " << strerror(errno) << std::endl;
             return;
-        } else if (status ==  0) {
+        } 
+        else if (status ==  0) 
+        {
             std::cout << "[Server] Waiting...\n";
             continue;
         }
 
         for (int i =  0; i <= fd_max; i++) {
             if (FD_ISSET(i, &copy_read_fds)) {
-                if (i == server_socket_1 || i == server_socket_2 || i == server_socket_3) {
+                if (i == server_socket_1 || i == server_socket_2 || i == server_socket_3) 
+                {
                     accept_new_connection(i, copy_read_fds, &fd_max);
-                } else {
+                } 
+                else 
+                {
                     read_data_from_socket(i, copy_read_fds, copy_write_fds);
                 }
             }
@@ -223,8 +232,10 @@ void Server::run()
                 if (param_req_one.path.compare("/images/bel-kdio.jpg") == 0)
                     param_req_one.path = "./images/bel-kdio.jpg";
                 if (param_req_one.path.compare("/images/maxresdefault.jpg") == 0)
-                    param_req_one.path = "./images/maxresdefault.jpg";    
-                if (param_req_one.path.compare("./images/rarraji.jpg") != 0 && param_req_one.path.compare("./images/bel-kdio.jpg") != 0 && param_req_one.path.compare("./images/maxresdefault.jpg"))
+                    param_req_one.path = "./images/maxresdefault.jpg";
+                if (param_req_one.path.compare("/images/vedeo.mp4") == 0)
+                    param_req_one.path = "./images/vedeo.mp4";      
+                if (param_req_one.path.compare("./images/rarraji.jpg") != 0 && param_req_one.path.compare("./images/bel-kdio.jpg") != 0 && param_req_one.path.compare("./images/maxresdefault.jpg") && param_req_one.path.compare("./images/vedeo.mp4"))
                 {
                     new_path += param_req_one.path + ".html";
                     std::cout << "HERE2\n";
@@ -236,27 +247,21 @@ void Server::run()
                 }
                     
                 std::cout << new_path << std::endl;
-                // // Envoi d'un message de bienvenue au client
-                // const char *welcome_message = "HTTP/1.1  200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>";
-                // send(i, welcome_message, strlen(welcome_message),  0);
-               
-
-                // // Envoi du contenu du fichier via la socket
-
-                // Envoi du contenu du fichier via la socket
-                // HTTP/1.1   200 OK
-                // Content-Type: text/html
-
+        
                 std::string response;
                 std::stringstream buffer;
                 response = "HTTP/1.1 200 OK\r\n";
+
+                // if(param_req_one.)
+
+
+                
                 if (new_path.compare("./images/rarraji.jpg") == 0 || new_path.compare("./images/bel-kdio.jpg") == 0 || new_path.compare("/images/maxresdefault.jpg") == 0)
                 {
-                    std::cout << "here!\n";
                     std::ifstream file(new_path.c_str(), std::ios::binary);
                     if (!file.is_open()) 
                     {
-                        std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
+                        std::cerr << "[Server] Impossible d'ouvrir image " << "\n";
                         continue;
                     }
                    
@@ -264,9 +269,22 @@ void Server::run()
                     file.close();
                     response += "Content-Type: image/jpg\r\n";
                 }
+                else if (new_path.compare("./images/vedeo.mp4") == 0)
+                {
+                    std::ifstream file(new_path.c_str(), std::ios::binary);
+                    if (!file.is_open()) 
+                    {
+                        std::cerr << "[Server] Impossible d'ouvrir le vedeo " << "\n";
+                        continue;
+                    }
+                   
+                    buffer << file.rdbuf();
+                    file.close();
+                    response += "Content-Type: video/mp4\r\n";
+                }
+                
                 else
                 {
-                    std::cout << "here9!\n";
                     std::ifstream file(new_path.c_str());
                     if (!file.is_open()) 
                     {

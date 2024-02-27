@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:14 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/26 10:32:15 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/02/27 15:25:11 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ typedef struct param_req
   std::string version_http;
   std::string ip;
   std::string port;
+  std::string methode;
 } param_req;
 
 class Server 
