@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/02/27 20:47:57 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/03/01 12:41:07 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,31 +77,110 @@ void Server::accept_new_connection(int listener_socket, fd_set &read_fds, int *f
     std::cout << "[Server] Accepted new connection on client socket " << client_fd << ".\n";
 }
 
-void Server::read_data_from_socket(int socket, fd_set &read_fds, fd_set &write_fds) 
-{
-    char buffer[10240];
-    int bytes_read;
+void Server::read_data_from_socket(int socket, fd_set &read_fds, fd_set &write_fds) {
+    char buffer[1024];
+    int valread;
+    bool headersEnded = false;
 
-    memset(&buffer, '\0', sizeof buffer);
-    bytes_read = recv(socket, buffer, BUFSIZ,   0);
-    std::cout << "---------------------------------------------------------\n" << std::endl;
-    std::cout << buffer << std::endl;
-    std::cout << "---------------------------------------------------------\n" << std::endl;
-    parse_req(buffer);
-    if (bytes_read <=   0) 
-    {
-        if (bytes_read ==   0) 
-        {
-            std::cout << "[Server] Client socket closed connection.\n";
-        } else 
-        {
-            std::cerr << "[Server] Recv error: " << strerror(errno) << std::endl;
+    // Définir un délai d'attente pour la lecture
+    struct timeval tv;
+    tv.tv_sec = 2;  // 2 secondes de délai
+    tv.tv_usec = 0;
+    setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+
+    // Lecture des en-têtes HTTP jusqu'à la ligne vide
+    std::string requestHeaders;
+    while (!headersEnded) {
+        valread = read(socket, buffer, sizeof(buffer) - 1);
+        if (valread > 0) {
+            buffer[valread] = '\0'; // Assurez-vous que la chaîne est terminée par un caractère nul
+            printf("%s", buffer); // Affiche les en-têtes HTTP
+            requestHeaders += buffer; // Concaténer les données dans une chaîne
+
+            // Vérifie si la ligne est vide (fin des en-têtes)
+            if (requestHeaders.find("\r\n\r\n") != std::string::npos) {
+                headersEnded = true;
+            }
+        } else if (valread == 0) {
+            // La connexion a été fermée par l'autre côté
+            break;
+        } else {
+            // Une erreur s'est produite
+            perror("Erreur lors de la lecture des données");
+            break;
         }
-        close(socket);
     }
+
+    // Analyser les en-têtes
+    parse_req(requestHeaders);
+
+    // Lire le corps de la réponse
+    // std::string requestBody;
+    std::ofstream file("../fichier.txt" , std::ofstream::app); 
+    while ((valread = read(socket, buffer, sizeof(buffer) - 1)) > 0) {
+        buffer[valread] = '\0'; // Assurez-vous que la chaîne est terminée par un caractère nul
+        printf("%s\n", buffer);
+        file << buffer; // Concaténer les données dans une chaîne
+        // file << requestBody;
+    }
+    // std::cout << requestBody << std::endl;
+    // if (file.is_open()) 
+    // {
+    //     file << requestBody;
+    //     file.close();
+    //     std::cout << "Le fichier a été créé avec succès dans le répertoire de travail." << std::endl;
+    // } 
+    // else 
+    // {
+    //     std::cout << "Impossible de créer le fichier." << std::endl;
+    // }
+
+    // Gérer les erreurs de lecture
+    if (valread < 0) 
+    {
+        // Une erreur s'est produite lors de la lecture
+        perror("Erreur lors de la lecture des données");
+    }
+
+    // Nettoyer les descripteurs de fichier
     FD_CLR(socket, &read_fds);
     FD_SET(socket, &write_fds);
 }
+
+
+        // Lecture du corps de la requête
+//         char body[1024] = {0};
+//         valread = read(socket, body, 1024);
+//           // parse_req(buffer);
+//         std::cout << "---------------------------------------------------------\n" << std::endl;
+//         if (valread > 0) 
+//         {
+//             printf("Corps de la requête : %s\n", body);
+//         }
+//         std::cout << "---------------------------------------------------------\n" << std::endl;
+//         // Fermeture du socket;
+//         // close(socket);
+// }
+
+
+    
+    // std::cout << "---------------------------------------------------------\n" << std::endl;
+    // std::cout << buffer << std::endl;
+    // std::cout << "---------------------------------------------------------\n" << std::endl;
+    // parse_req(buffer);
+    // if (bytes_read <=   0) 
+    // {
+    //     if (bytes_read ==   0) 
+    //     {
+    //         std::cout << "[Server] Client socket closed connection.\n";
+    //     } else 
+    //     {
+    //         std::cerr << "[Server] Recv error: " << strerror(errno) << std::endl;
+    //     }
+    //     close(socket);
+    // }
+   
+// }
 
 void Server::parse_req(std::string buffer) 
 {
@@ -110,7 +189,7 @@ void Server::parse_req(std::string buffer)
     int i =   0;
     int cnt =   0;
     // param_req param_req;
-
+    std::cout <<"here\n"; 
     while(getline(ss, str, '\n')) 
     {
         std::map<std::string, std::string> MyMap;
@@ -217,8 +296,7 @@ void Server::run()
                 // std::string test1 = "/favicon.ico";
                 // std::string path = "./pages";
                 std::string new_path = "./pages";
-                std::cout << "----> " << param_req_one.path << std::endl;    
-                
+                std::cout << "----> " << param_req_one.path << std::endl;
                 if (param_req_one.path.compare("/home") == 0)
                     param_req_one.path = "/home";
                 if (param_req_one.path.compare("/favicon.ico") == 0)
@@ -234,8 +312,10 @@ void Server::run()
                 if (param_req_one.path.compare("/images/maxresdefault.jpg") == 0)
                     param_req_one.path = "./images/maxresdefault.jpg";
                 if (param_req_one.path.compare("/images/vedeo.mp4") == 0)
-                    param_req_one.path = "./images/vedeo.mp4";      
-                if (param_req_one.path.compare("./images/rarraji.jpg") != 0 && param_req_one.path.compare("./images/bel-kdio.jpg") != 0 && param_req_one.path.compare("./images/maxresdefault.jpg") && param_req_one.path.compare("./images/vedeo.mp4"))
+                    param_req_one.path = "./images/vedeo.mp4";
+                if(param_req_one.methode.compare("POST") == 0)
+                    param_req_one.path = "../fichier.jpg";          
+                if (param_req_one.path.compare("./images/rarraji.jpg") != 0 && param_req_one.path.compare("./images/bel-kdio.jpg") != 0 && param_req_one.path.compare("./images/maxresdefault.jpg") && param_req_one.path.compare("./images/vedeo.mp4") && param_req_one.path.compare("../fichier.jpg") != 0)
                 {
                     new_path += param_req_one.path + ".html";
                     std::cout << "HERE2\n";
@@ -256,7 +336,7 @@ void Server::run()
 
 
                 
-                if (new_path.compare("./images/rarraji.jpg") == 0 || new_path.compare("./images/bel-kdio.jpg") == 0 || new_path.compare("/images/maxresdefault.jpg") == 0)
+                if (new_path.compare("./images/rarraji.jpg") == 0 || new_path.compare("./images/bel-kdio.jpg") == 0 || new_path.compare("/images/maxresdefault.jpg") == 0 || new_path.compare("../fichier.jpg") == 0)
                 {
                     std::ifstream file(new_path.c_str(), std::ios::binary);
                     if (!file.is_open()) 
@@ -304,3 +384,4 @@ void Server::run()
         }
     }
 }
+

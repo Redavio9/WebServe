@@ -6,7 +6,7 @@
 #    By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/22 10:15:25 by rarraji           #+#    #+#              #
-#    Updated: 2024/02/27 13:01:10 by rarraji          ###   ########.fr        #
+#    Updated: 2024/03/01 11:07:17 by rarraji          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME    = Server
 CC      = c++
 FLAGS   = -Wall -Wextra -Werror -std=c++98
 RM      = rm -rf
-SRC     = Server.cpp main.cpp
+SRC     = main.cpp Server.cpp
 OBJ     = $(SRC:.cpp=.o) 
 
 # Colors
