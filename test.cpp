@@ -1,8 +1,6 @@
-
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
+#include <cstring>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -12,12 +10,14 @@
 #define MAX_CLIENTS 10
 #define BUFFER_SIZE 1024
 
-void error(const char *msg) {
+void error(const char *msg) 
+{
     perror(msg);
     exit(EXIT_FAILURE);
 }
 
-int create_server_socket(void) {
+int create_server_socket(void) 
+{
     struct sockaddr_in sa;
     int socket_fd, status;
 
@@ -27,13 +27,15 @@ int create_server_socket(void) {
     sa.sin_port = htons(PORT);
 
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (socket_fd == -1) {
+    if (socket_fd == -1) 
+    {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
 
     status = bind(socket_fd, (struct sockaddr *)&sa, sizeof(sa));
-    if (status == -1) {
+    if (status == -1) 
+    {
         perror("Bind failed");
         exit(EXIT_FAILURE);
     }
@@ -41,7 +43,15 @@ int create_server_socket(void) {
     return socket_fd;
 }
 
-void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max) {
+void send_message_to_client(int client_socket, const char *msg) {
+    int status = send(client_socket, msg, strlen(msg), 0);
+    if (status == -1) {
+        perror("Send error");
+    }
+}
+
+void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max) 
+{
     int client_fd, status;
     struct sockaddr_in client_addr;
     socklen_t addr_len = sizeof(client_addr);
@@ -57,7 +67,7 @@ void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max) 
         *fd_max = client_fd;
     }
 
-    printf("[Server] Accepted new connection on client socket %d.\n", client_fd);
+    std::cout << "[Server] Accepted new connection on client socket " << client_fd << ".\n";
 
     char msg_to_send[BUFFER_SIZE];
     snprintf(msg_to_send, sizeof(msg_to_send), "Welcome. You are client fd [%d]\n", client_fd);
@@ -68,21 +78,22 @@ void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max) 
     }
 }
 
-void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket) {
+void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int server_socket) 
+{
     char buffer[BUFFER_SIZE];
     int bytes_read, status;
 
     bytes_read = recv(socket, buffer, sizeof(buffer), 0);
     if (bytes_read <= 0) {
         if (bytes_read == 0) {
-            printf("[%d] Client socket closed connection.\n", socket);
+            std::cout << "[" << socket << "] Client socket closed connection.\n";
         } else {
             perror("Recv error");
         }
         close(socket);
         FD_CLR(socket, all_sockets);
     } else {
-        printf("[%d] Got message: %s", socket, buffer);
+        std::cout << "[" << socket << "] Got message: " << buffer;
 
         char msg_to_send[BUFFER_SIZE];
         snprintf(msg_to_send, sizeof(msg_to_send), "[%d] says: %s", socket, buffer);
@@ -95,14 +106,24 @@ void read_data_from_socket(int socket, fd_set *all_sockets, int *fd_max, int ser
                 }
             }
         }
+
+        // If the message is from the server, broadcast it to all clients
+        if (socket == server_socket) {
+            for (int j = 0; j <= *fd_max; j++) {
+                if (FD_ISSET(j, all_sockets) && j != server_socket) {
+                    send_message_to_client(j, msg_to_send);
+                }
+            }
+        }
     }
 }
 
 int main(void) {
-    printf("---- SERVER ----\n\n");
+    std::cout << "---- SERVER ----\n\n";
 
     int server_socket, status;
-    fd_set all_sockets, read_fds;
+    // fd_set write_sockets, read_fds;
+    // fd_set write_sockets_copy, read_fds_copy;
     int fd_max = 0;
     struct timeval timer;
 
@@ -114,12 +135,12 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    FD_ZERO(&all_sockets);
+    FD_ZERO(&write_sockets);
     FD_ZERO(&read_fds);
-    FD_SET(server_socket, &all_sockets);
+    FD_SET(server_socket, &read_fds);
     fd_max = server_socket;
 
-    printf("[Server] Listening on port %d\n", PORT);
+    std::cout << "[Server] Listening on port " << PORT << "\n";
 
     while (1) {
         read_fds = all_sockets;
@@ -131,7 +152,7 @@ int main(void) {
             perror("Select error");
             exit(EXIT_FAILURE);
         } else if (status == 0) {
-            printf("[Server] Waiting...\n");
+            std::cout << "[Server] Waiting...\n";
             continue;
         }
 
