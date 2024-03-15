@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:24 by rarraji           #+#    #+#             */
-/*   Updated: 2024/03/13 17:26:15 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/03/15 02:01:34 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ class Request{
     std::string header;
     std::string body;
     int body_lenght;
-    bool chanked;
+    bool chunked;
     bool Get;
     bool check;
     bool ContentLength;

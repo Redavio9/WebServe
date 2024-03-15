@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:27 by rarraji           #+#    #+#             */
-/*   Updated: 2024/03/14 01:33:08 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/03/15 02:10:36 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void Request::CheckChunked()
 {
   // bool chunked = false;
   if (header.find("chunked") != std::string::npos)
-    chanked = true;
+    chunked = true;
   size_t pos;
   if ((pos = body.find("\r\n\r\n")) != std::string::npos)
   {
@@ -94,7 +94,7 @@ void Request::AddHeaderBody()
     header = header.substr(0, pos + 2);
   }
   CheckChunked();
-  if ((pos = body.find("Content-Type: ")) != std::string::npos && !chanked)
+  if ((pos = body.find("Content-Type: ")) != std::string::npos && chunked)
   {
     std::cout << "hereeeeeeeeeeeeeeeeeeeeeeeeeeee\n";
     body = body.substr(pos + 14 , body.length());
@@ -115,6 +115,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
       buffer[valread] = '\0';
       request.append(buffer, valread);
       remplirMyMap(socket);
+      CheckMethodeReq(socket);
       AddHeaderReq(valread);
       if ((pos = request.find("Content-Length: ")) != std::string::npos)
       {
@@ -123,12 +124,16 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
       }
   }
   // std::cout << "body_lenght :" << body_lenght << std::endl;
+  // std::cout << "GET :" << Get << std::endl;
   // std::cout << "compareLenBod : " << compareLenBody << std::endl;
   if ((request.find("\r\n\r\n") != std::string::npos && Get) || (request.find("\r\n\r\n0") != std::string::npos && !Get) || compareLenBody >= body_lenght)
   {
       body = request.substr(header_len, request.length());
-      if(!Get)
-        AddHeaderBody();
+      AddHeaderBody();
+      if ((pos = header.find("\r\n\r\n")) != std::string::npos)
+      {
+        header = header.substr(0, pos + 2);
+      }  
       std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
       std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
       std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
