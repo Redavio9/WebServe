@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:27 by rarraji           #+#    #+#             */
-/*   Updated: 2024/03/15 02:10:36 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/03/17 01:34:25 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 Request::Request()
 {
   compareLenBody = 0;
+  Get = false;
+  last = true;
+  start = 0;
 }
 
 
@@ -73,9 +76,9 @@ void Request::AddHeaderReq(int valread)
 void Request::CheckChunked()
 {
   // bool chunked = false;
+  size_t pos;
   if (header.find("chunked") != std::string::npos)
     chunked = true;
-  size_t pos;
   if ((pos = body.find("\r\n\r\n")) != std::string::npos)
   {
     std::cout << "->>>>>>>>>>hereeeeeeeeeeee\n";
@@ -83,12 +86,42 @@ void Request::CheckChunked()
   }
 }
 
+int hexStringToDecimal(const std::string& hexString) 
+{
+    std::stringstream ss;
+    ss << std::hex << hexString; // Utiliser std::hex pour indiquer que la chaîne est hexadécimale
+    int decimalValue;
+    ss >> decimalValue; // Convertit la chaîne hexadécimale en décimal
+    return decimalValue;
+}
 
+
+void Request::RegContent(int nb)
+{
+  std::string newb;
+
+  // std::stringstream ss(body);
+  // getline(ss, newb , '\n');
+  body = body.substr(nb + 2 , body.length());
+  std::cout << body;
+  // start = nb + 2;
+    // const char* filename = body.c_str();
+    // int fd = open(filename, O_RDONLY);
+    // char buffer[nb + 1]; // Buffer pour stocker les données lues
+    // ssize_t bytesRead;
+    // bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+    //     buffer[bytesRead] = '\0';
+    // std::cout << buffer << std::endl;    
+    // close(fd);
+    // return(buffer);
+}
 
 void Request::AddHeaderBody()
 {
   // std::cout << "----->hereeeeee !!\n";
   size_t pos;
+  std::string num_one;
+  std::string num_one_2;
   if ((pos = header.find("\r\n\r\n")) != std::string::npos)
   {
     header = header.substr(0, pos + 2);
@@ -99,10 +132,40 @@ void Request::AddHeaderBody()
     std::cout << "hereeeeeeeeeeeeeeeeeeeeeeeeeeee\n";
     body = body.substr(pos + 14 , body.length());
     body = body.substr(body.find("\n") + 1, body.length());
-    int poss = body.find("----------------------------");
-    body = body.substr(0, poss);
+    body = body.substr(body.find("\n") + 1, body.length());
+    body = body.substr(body.find("\n") + 1, body.length());
+    // body = body.substr(body.find("\n"), body.length());
+    // int poss = body.find("----------------------------");
+    // body = body.substr(0, poss);
   }
-  
+  // num_one_2 = body.substr(num_one_2.length() + 2, body.find("\n") - 2);
+  std::cout << "-------------------------------------\n";
+  std::cout << "-->" << body << std::endl;
+  std::cout << "-------------------------------------\n";
+  int nb = 0;
+  while(true)
+  {
+    std::stringstream ss(body);
+    getline(ss, num_one, '\r');
+    std::cout << num_one << std::endl;
+    if(hexStringToDecimal(num_one) == 0)
+      break;
+    nb =  hexStringToDecimal(num_one);
+    std::cout << "nb :" << nb << std::endl;
+    std::cout << "body_lenght :" << body.length() << std::endl;
+    body = body.substr(body.find("\n") + 1, body.length());
+    std::cout << "start :" << start << std::endl;
+    std::cout << "-------------------\n";
+    std::cout << body.substr(start, nb);
+    std::cout << "-------------------\n";
+    new_body += body.substr(start, nb);
+    RegContent(nb);
+    // body = body.substr(nb + 1, body.length());
+    std::cout << "\033[0;36m" << "----->"  << nb << "\033[0m" << std::endl;
+    start = 0;
+  }
+  int poss = new_body.find("----------------------------");
+    new_body = new_body.substr(0, poss);
 }
 
 void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
@@ -119,6 +182,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
       AddHeaderReq(valread);
       if ((pos = request.find("Content-Length: ")) != std::string::npos)
       {
+        std::cout << "\033[0;35m"  << "========CHUNKED========" << "\033[0m" << std::endl;
         body_lenght = std::atoi(request.substr(pos + 16,  request.find("\r\n", pos + 16) - pos + 16).c_str());
         header_len = pos + 16;
       }
@@ -128,7 +192,10 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
   // std::cout << "compareLenBod : " << compareLenBody << std::endl;
   if ((request.find("\r\n\r\n") != std::string::npos && Get) || (request.find("\r\n\r\n0") != std::string::npos && !Get) || compareLenBody >= body_lenght)
   {
+      std::cout << "\033[0;35m" << "---------->>>>>ALL-REQUSTE<<<<<--------" << "\033[0m" << std::endl;
+      // std::cout << "\033[0;35m"  <<  request.length() << "\033[0m" << std::endl;
       body = request.substr(header_len, request.length());
+      
       AddHeaderBody();
       if ((pos = header.find("\r\n\r\n")) != std::string::npos)
       {
@@ -138,7 +205,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
       std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
       std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
       std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
-      std::cout << "\033[0;33m" << body << "\033[0m" << std::endl;
+      std::cout << "\033[0;33m" << new_body << "\033[0m" << std::endl;
       std::cout << "\033[0;33m" << "**************************************************************************" << "\033[0m" << std::endl;
       request = "";
       FD_CLR(socket, &read_fds);
@@ -161,3 +228,7 @@ MyMapy::iterator Request::beginMyMap()
 MyMapy::iterator Request::endMyMap() {
     return my_map.end();
 }
+
+
+
+// Transfer-Encoding

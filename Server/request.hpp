@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:24 by rarraji           #+#    #+#             */
-/*   Updated: 2024/03/15 02:01:34 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/03/17 00:35:57 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,16 @@ class Request{
     char buffer[2048];
     std::string header;
     std::string body;
+    std::string new_body;
     int body_lenght;
     bool chunked;
     bool Get;
     bool check;
+    bool last;
     bool ContentLength;
     int compareLenBody;
     int header_len;
+    int start;
   public:
     Request();
     int read_socket(int socket);
@@ -64,6 +67,7 @@ class Request{
     void AddHeaderReq(int valread);
     void AddHeaderBody();
     void CheckChunked();
+    void RegContent(int nb);
     MyMapy::iterator beginMyMap();
     MyMapy::iterator endMyMap();
 };
