@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:27 by rarraji           #+#    #+#             */
-/*   Updated: 2024/03/17 01:34:25 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/03/23 17:55:37 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ int Request::read_socket(int socket)
 {
     int valread;
     fcntl(socket, F_SETFL, O_NONBLOCK , FD_CLOEXEC);
-    valread = read(socket, buffer, sizeof(buffer) - 1);
+    valread = read(socket, buffer, sizeof(buffer) - 1);  
     return (valread);
 }
 
@@ -50,10 +50,10 @@ void Request::CheckMethodeReq(int socket)
       if (it1->second == "GET")
       {
         Get = true;
-        std::cout << "GET" << std::endl;
+        // std::cout << "GET" << std::endl;
       }
       else;
-        std::cout << "POST" << std::endl;  
+        // std::cout << "POST" << std::endl;  
     }
   }
 }
@@ -61,7 +61,7 @@ void Request::CheckMethodeReq(int socket)
 void Request::AddHeaderReq(int valread)
 {
   size_t pos;
-  std::cout << check << std::endl;
+  // std::cout << check << std::endl;
   if ((pos = request.find("\r\n\r\n")) != std::string::npos && !check)
   {
     check = true;
@@ -81,7 +81,7 @@ void Request::CheckChunked()
     chunked = true;
   if ((pos = body.find("\r\n\r\n")) != std::string::npos)
   {
-    std::cout << "->>>>>>>>>>hereeeeeeeeeeee\n";
+    // std::cout << "->>>>>>>>>>hereeeeeeeeeeee\n";
     body = body.substr(pos + 4 , body.length());
   }
 }
@@ -103,7 +103,7 @@ void Request::RegContent(int nb)
   // std::stringstream ss(body);
   // getline(ss, newb , '\n');
   body = body.substr(nb + 2 , body.length());
-  std::cout << body;
+  // std::cout << body;
   // start = nb + 2;
     // const char* filename = body.c_str();
     // int fd = open(filename, O_RDONLY);
@@ -126,46 +126,55 @@ void Request::AddHeaderBody()
   {
     header = header.substr(0, pos + 2);
   }
-  CheckChunked();
-  if ((pos = body.find("Content-Type: ")) != std::string::npos && chunked)
+  if(!Get)
   {
-    std::cout << "hereeeeeeeeeeeeeeeeeeeeeeeeeeee\n";
-    body = body.substr(pos + 14 , body.length());
-    body = body.substr(body.find("\n") + 1, body.length());
-    body = body.substr(body.find("\n") + 1, body.length());
-    body = body.substr(body.find("\n") + 1, body.length());
-    // body = body.substr(body.find("\n"), body.length());
-    // int poss = body.find("----------------------------");
-    // body = body.substr(0, poss);
+    CheckChunked();
+    std::cout << body << std::endl;
+    if ((pos = body.find("Content-Type: ")) != std::string::npos)
+    {
+      std::cout << "hereeeeeeeeeeeeeeeeeeeeeeeeeeee\n";
+      body = body.substr(pos + 14 , body.length());
+      body = body.substr(body.find("\n") + 1, body.length());
+      body = body.substr(body.find("\n") + 1, body.length());
+      body = body.substr(body.find("\n") + 1, body.length());
+      // body = body.substr(body.find("\n"), body.length());
+      // int poss = body.find("----------------------------");
+      // body = body.substr(0, poss);
+    }
+    // num_one_2 = body.substr(num_one_2.length() + 2, body.find("\n") - 2);
+  
+    int nb = 0;
+    while(true && chunked)
+    {
+      std::stringstream ss(body);
+      getline(ss, num_one, '\r');
+      // std::cout << num_one << std::endl;
+      if(hexStringToDecimal(num_one) == 0)
+        break;
+      nb =  hexStringToDecimal(num_one);
+      // std::cout << "nb :" << nb << std::endl;
+      // std::cout << "body_lenght :" << body.length() << std::endl;
+      body = body.substr(body.find("\n") + 1, body.length());
+      // std::cout << "start :" << start << std::endl;
+      // std::cout << "-------------------\n";
+      // std::cout << body.substr(start, nb);
+      // std::cout << "-------------------\n";
+      new_body += body.substr(start, nb);
+      RegContent(nb);
+      // body = body.substr(nb + 1, body.length());
+      // std::cout << "\033[0;36m" << "----->"  << nb << "\033[0m" << std::endl;
+      start = 0;
+    }
   }
-  // num_one_2 = body.substr(num_one_2.length() + 2, body.find("\n") - 2);
-  std::cout << "-------------------------------------\n";
-  std::cout << "-->" << body << std::endl;
-  std::cout << "-------------------------------------\n";
-  int nb = 0;
-  while(true)
+  if (Get)
   {
-    std::stringstream ss(body);
-    getline(ss, num_one, '\r');
-    std::cout << num_one << std::endl;
-    if(hexStringToDecimal(num_one) == 0)
-      break;
-    nb =  hexStringToDecimal(num_one);
-    std::cout << "nb :" << nb << std::endl;
-    std::cout << "body_lenght :" << body.length() << std::endl;
-    body = body.substr(body.find("\n") + 1, body.length());
-    std::cout << "start :" << start << std::endl;
-    std::cout << "-------------------\n";
-    std::cout << body.substr(start, nb);
-    std::cout << "-------------------\n";
-    new_body += body.substr(start, nb);
-    RegContent(nb);
-    // body = body.substr(nb + 1, body.length());
-    std::cout << "\033[0;36m" << "----->"  << nb << "\033[0m" << std::endl;
-    start = 0;
+    new_body = body;
+    // std::cout << "\033[0;32m" << "-------------------------------------------------------" << "\033[0m" << std::endl ;
+    // std::cout  << new_body << std::endl;
+    // std::cout << "\033[0;32m" << "-------------------------------------------------------" << "\033[0m" << std::endl;
+    int poss = new_body.find("----------------------------");
+      new_body = new_body.substr(0, poss);
   }
-  int poss = new_body.find("----------------------------");
-    new_body = new_body.substr(0, poss);
 }
 
 void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
@@ -194,8 +203,8 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
   {
       std::cout << "\033[0;35m" << "---------->>>>>ALL-REQUSTE<<<<<--------" << "\033[0m" << std::endl;
       // std::cout << "\033[0;35m"  <<  request.length() << "\033[0m" << std::endl;
-      body = request.substr(header_len, request.length());
-      
+      if(!Get)
+        body = request.substr(header_len, request.length());
       AddHeaderBody();
       if ((pos = header.find("\r\n\r\n")) != std::string::npos)
       {
