@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:24 by rarraji           #+#    #+#             */
-/*   Updated: 2024/03/17 00:35:57 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/04/16 11:23:34 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ class Request{
     void AddHeaderBody();
     void CheckChunked();
     void RegContent(int nb);
+    void check_req_valid();
     MyMapy::iterator beginMyMap();
     MyMapy::iterator endMyMap();
 };
