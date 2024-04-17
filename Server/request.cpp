@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:27 by rarraji           #+#    #+#             */
-/*   Updated: 2024/04/16 12:09:10 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/04/17 19:17:21 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ void Request::AddHeaderBody()
       start = 0;
     }
   }
-  if (!Get)
+  if (Get)
   {
     new_body = body;
     if(chunked)
@@ -177,6 +177,7 @@ void Request::check_req_valid()
         if (j == 1)
         {
           //check URL !!!!!!
+          //check qwery params
         }
         if (j == 2)
         {
@@ -202,7 +203,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
   int valread;
   valread = read_socket(socket);
   size_t pos = 0;
-  // headre req
+  // header req
   if (valread > 0) 
   {
       buffer[valread] = '\0';
