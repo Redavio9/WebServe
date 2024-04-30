@@ -6,16 +6,16 @@
 #    By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/22 10:15:25 by rarraji           #+#    #+#              #
-#    Updated: 2024/03/11 11:46:33 by rarraji          ###   ########.fr        #
+#    Updated: 2024/04/26 11:46:11 by rarraji          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME    = Server
 
 CC      = c++
-FLAGS   = -Wall -Wextra -Werror -std=c++98
+FLAGS   = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
 RM      = rm -rf
-SRC     = main.cpp Server.cpp request.cpp
+SRC     = main.cpp Server.cpp request.cpp cgi.cpp
 OBJ     = $(SRC:.cpp=.o) 
 
 # Colors

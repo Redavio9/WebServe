@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:24 by rarraji           #+#    #+#             */
-/*   Updated: 2024/04/16 11:23:34 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/04/27 14:07:28 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <thread>
+#include "cgi.hpp"
 
 
 typedef std::map<std::string, std::string> LittleMap;
@@ -44,9 +45,6 @@ class Request{
     MyMapy my_map;
     std::string request;
     char buffer[2048];
-    std::string header;
-    std::string body;
-    std::string new_body;
     int body_lenght;
     bool chunked;
     bool Get;
@@ -56,7 +54,15 @@ class Request{
     int compareLenBody;
     int header_len;
     int start;
+    
+    // bool cgi;
   public:
+    std::string header;
+    std::string body;
+    std::string new_body;
+    std::string url;
+    std::string methode;
+    std::string host;
     Request();
     int read_socket(int socket);
     void Check_read(int socket, fd_set &read_fds, fd_set &write_fds);
@@ -69,6 +75,8 @@ class Request{
     void CheckChunked();
     void RegContent(int nb);
     void check_req_valid();
+    void UploadFiles();
+    void CreatFiles(std::string NameFile, std::string buf, bool check);
     MyMapy::iterator beginMyMap();
     MyMapy::iterator endMyMap();
 };

@@ -3,11 +3,19 @@ server:
 	host: "10.0.0.1"
 	root: "www"
 	server_name: ["example.com"]
-	location:
+	location web2:
 		prefix: "/example.html"
     allowed_methods : ["GET" ,"POST", "DELETE"]
     error_page : ["404", "www/error_pages/404.html"]
-    redirect : ["old_about.html", "about.html"]
+    redirect : ["301", "about.html"]
+
+	location web1:
+		prefix: "/example.html"
+    allowed_methods : ["GET" ,"POST", "DELETE"]
+    error_page : ["404", "www/error_pages/404.html"]
+    redirect : ["301", "about.html"]
+
+
 server:
 	port: "1339"
 	host: "10.0.16.2"
@@ -18,3 +26,5 @@ server:
     allowed_methods : ["GET" ,"POST", "DELETE"]
     error_page : ["404", "www/error_pages/404.html"]
     redirect : ["old_about.html", "about.html"]
+ 
+localhost:8080/web1 -> /web1 -> /web1/ www/web1/fghfgh.html
