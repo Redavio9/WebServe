@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:27 by rarraji           #+#    #+#             */
-/*   Updated: 2024/04/28 10:24:50 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/01 15:26:06 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -358,20 +358,26 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
       AddHeaderBody();
       if ((pos = header.find("\r\n\r\n")) != std::string::npos)
         header = header.substr(0, pos + 2);
-      std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
-      std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
-      std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
-      std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
-      std::cout << "\033[0;33m" << new_body << "\033[0m" << std::endl;
-      std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
-      // if (!cgi)
-        UploadFiles();
+      // std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
+      // std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
+      // std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
+      // std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
+      // std::cout << "\033[0;33m" << new_body << "\033[0m" << std::endl;
+      // std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
+      // // if (!cgi)
+        // UploadFiles();
       // else
         //cgi
       // Cgi cgi;
       // cgi.SetHeader(header);
       // cgi.SetBody(body);
       // cgi.run();  
+
+      std::cout << "herre\n";
+      response.SetHeader(header);
+      response.SetBody(body);
+      response.SetUrl(url);
+      // response.run();
       request = "";
       FD_CLR(socket, &read_fds);
       FD_SET(socket, &write_fds);

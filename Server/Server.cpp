@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/04/29 12:19:56 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/01 15:45:12 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,21 +31,6 @@
 #include <cstring>
 #include <unistd.h>
 #include <thread>
-
-
-// Fonction pour lire le corps de la requête
-// void Server::readBody(int socket, std::string& body) 
-// {
-//     char buffer[1024];
-//     ssize_t bytesRead;
-//     bytesRead = recv(socket, buffer, sizeof(buffer) - 1, 0);
-//     if (bytesRead > 0) 
-//     {
-//         buffer[bytesRead] = '\0';
-//         body += buffer;
-//     }
-//     while (bytesRead > 0);
-// }
 
 
 Server::Server() 
@@ -120,61 +105,6 @@ void Server::read_data_from_socket(int socket, fd_set &read_fds, fd_set &write_f
 }
 
 
-// void Server::parse_req(std::string buffer) 
-// {
-//     std::stringstream ss(buffer);
-//     std::string str;
-//     int i =   0;
-//     int cnt =   0;
-
-//     while(getline(ss, str, '\n')) 
-//     {
-//         std::map<std::string, std::string> MyMap;
-//         int j = str.find(' ');
-//         std::string key;
-//         std::string value;
-//         key = str.substr(0,j);
-//         value = str.substr(j,str.length());
-//         MyMap[key] = value;
-//         if (i == 0) 
-//         {
-//             std::stringstream ss(value);
-//             std::string buffer;
-//             while(getline(ss, buffer, ' ')) 
-//             {
-//                 if (cnt == 0 && i == 0)
-//                     param_req_one.methode = key;
-//                 if (cnt ==   1)
-//                     param_req_one.path = buffer;
-//                 if (cnt ==   2)
-//                     param_req_one.version_http = buffer;
-//                 cnt++;
-//             }
-//         }
-//         if (i ==   1) 
-//         {
-//             cnt =   0;
-//             std::stringstream ss(value);
-//             std::string buffer;
-//             getline(ss, buffer, ' ');
-//             while(getline(ss, buffer, ':')) 
-//             {
-//                 if (cnt ==   0)
-//                     param_req_one.ip = buffer;
-//                 if (cnt ==   1)
-//                     param_req_one.port = buffer;
-//                 cnt++;
-//             }
-//         }
-//         if(i ==   7)
-//             break;
-//         i++;
-//     }
-//     std::cout << "\033[32m" << "methode  : " << param_req_one.methode << "\033[0m" << std::endl;
-//     std::cout << "\033[32m" << "ip  : " << param_req_one.ip << std::endl << "port  : " << param_req_one.port << "\033[0m" << std::endl;
-//     std::cout << "\033[32m" << "path  : " << param_req_one.path << std::endl << "version_http  : " << param_req_one.version_http << "\033[0m" << std::endl;
-// }
-
 void Server::run() 
 {
     fd_set read_fds;
@@ -222,6 +152,7 @@ void Server::run()
             }
             if (FD_ISSET(i, &copy_write_fds)) 
             {
+                std::cout << "\033[32m" << "+++++++++++++++++++++++++++++RESPONSE++++++++++++++++++++++++++++++++++\033[0m" << std::endl;
                 for (std::map <int, infoserv>::iterator it = mapinfo.begin() ; it != mapinfo.end(); it++)
                 {
                     if(it->first == i)
@@ -231,131 +162,12 @@ void Server::run()
                         std::cout << "------------------------------------\n";
                         break;
                     }
-                    // for (std::map<int, std::string>::const_iterator it1 = it->second.begin() ; it1 != it->second.end(); it1++)
-                    // {
-                    //     if(it1->first == i)
-                    //     {
-                    //         std::cout << "------------------------------------\n";
-                    //         std::cout << it1->second << std::endl;
-                    //         std::cout << "------------------------------------\n";
-                    //     }     
-                    // }        
-                    // if (it->first. == i)
                 }
-                
-                // std::cout << "---->" << " ip  : " << param_req.ip << std::endl << "port  : " << param_req.port << std::endl;
-                std::string test = "/";
-                std::string test1 = "/favicon.ico";
-                std::string path = "./pages";
-                std::string new_path = "./pages";
-                // std::cout << "----> " << param_req_one.path << std::endl;
-                if (mapinfo[i].request.url.compare("/home") == 0)
-                    mapinfo[i].request.url = "/home";
-                if (mapinfo[i].request.url.compare("/favicon.ico") == 0)
-                    mapinfo[i].request.url = "./images/rarraji.jpg";
-                if (mapinfo[i].request.url.compare("/") == 0)
-                    mapinfo[i].request.url = "/index";
-                if (mapinfo[i].request.url.compare("/upload") == 0)
-                    mapinfo[i].request.url = "/upload";
-                if (mapinfo[i].request.url.compare("/images/rarraji.jpg") == 0)
-                    mapinfo[i].request.url = "./images/rarraji.jpg";
-                if (mapinfo[i].request.url.compare("/images/bel-kdio.jpg") == 0)
-                    mapinfo[i].request.url = "./images/bel-kdio.jpg";
-                if (mapinfo[i].request.url.compare("/images/maxresdefault.jpg") == 0)
-                    mapinfo[i].request.url = "./images/maxresdefault.jpg";
-                if (mapinfo[i].request.url.compare("/images/vedeo.mp4") == 0)
-                    mapinfo[i].request.url = "./images/vedeo.mp4";
-                // if(mapinfo[i].request.methode.compare("POST") == 0)
-                //     mapinfo[i].request.url = "../fichier.txt";          
-                if (mapinfo[i].request.url.compare("./images/rarraji.jpg") != 0 && mapinfo[i].request.url.compare("./images/bel-kdio.jpg") != 0 && mapinfo[i].request.url.compare("./images/maxresdefault.jpg") && mapinfo[i].request.url.compare("./images/vedeo.mp4") && mapinfo[i].request.url.compare("../fichier.txt") != 0)
-                {
-                    new_path += mapinfo[i].request.url + ".html";
-                    std::cout << new_path << std::endl;
-                    std::cout << "HERE2\n";
-                }   
-                else
-                {
-                    new_path = mapinfo[i].request.url;
-                    // std::cout << "HERE1\n";
-                }
-                    
-                // std::cout << new_path << std::endl;
-        
-                std::string response;
-                std::stringstream buffer;
-                response = "HTTP/1.1 200 OK\r\n";
-
-                // if(param_req_one.)
-
-
-                
-                if (new_path.compare("./images/rarraji.jpg") == 0 || new_path.compare("./images/bel-kdio.jpg") == 0 || new_path.compare("/images/maxresdefault.jpg") == 0)
-                {
-                    std::ifstream file(new_path.c_str(), std::ios::binary);
-                    if (!file.is_open()) 
-                    {
-                        std::cerr << "[Server] Impossible d'ouvrir image " << "\n";
-                        continue;
-                    }
-                    std::cout << "here" << std::endl;
-                    buffer << file.rdbuf();
-                    file.close();
-                    response += "Content-Type: image/jpg\r\n";
-                }
-                else if (new_path.compare("./images/vedeo.mp4") == 0)
-                {
-                    std::ifstream file(new_path.c_str(), std::ios::binary);
-                    if (!file.is_open()) 
-                    {
-                        std::cerr << "[Server] Impossible d'ouvrir le vedeo " << "\n";
-                        continue;
-                    }
-                    buffer << file.rdbuf();
-                    file.close();
-                    // std::stringstream fi;
-                    std::ofstream fi("vedeo.mp4", std::ios::binary);
-                    if (!fi.is_open()) 
-                    {
-                        std::cerr << "[Server] Impossible d'ouvrir le vedeo " << "\n";
-                        continue;
-                    }
-                    fi << buffer.rdbuf();
-                    response += "Content-Type: video/mp4\r\n";
-                }
-                else if (new_path.compare("../fichier.txt") == 0)
-                {
-                    std::ofstream file_1("../image.txt");
-                    // std::ofstream file_1(new_path.c_str());
-                    if (!file_1.is_open()) 
-                    {
-                        std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
-                        continue;
-                    }
-                    file_1 << mapinfo[i].request.body;
-                    // this->body = '\0';
-                    buffer << file_1.rdbuf();
-                    file_1.close();
-                }
-                
-                else
-                {
-                    std::ifstream file(new_path.c_str());
-                    if (!file.is_open()) 
-                    {
-                        std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
-                        exit(1);
-                        continue;
-                    }
-                    buffer << file.rdbuf();
-                    file.close();
-                    response += "Content-Type: text/html\r\n";                    
-                }
-                // std::string response = "hello";
-                response += "\r\n";
+                std::cout << "************************************\n";
+                mapinfo[i].request.response.run();
+                std::cout << "************************************\n";
+                send(i,  mapinfo[i].request.response.SendResponse.c_str(), mapinfo[i].request.response.SendResponse.size(), 0);
                 FD_CLR(i,&write_fds);
-                response += response.append(buffer.str(), sizeof(buffer));
-                // response += buffer.str();
-                send(i, response.c_str(), response.size(), 0);
                 close(i);
                 std::cout << "\033[0;35m" << "---------->>>>>CLOSE-SOCKET<<<<<-------- : " << i << "\033[0m" << std::endl;
             }

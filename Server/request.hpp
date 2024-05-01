@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:24 by rarraji           #+#    #+#             */
-/*   Updated: 2024/04/27 14:07:28 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/01 13:09:50 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,9 @@
 #include <unistd.h>
 #include <thread>
 #include "cgi.hpp"
+#include "response.hpp"
 
+// class Response;
 
 typedef std::map<std::string, std::string> LittleMap;
 typedef std::map <int, std::map<std::string ,std::string> > MyMapy;
@@ -79,6 +81,7 @@ class Request{
     void CreatFiles(std::string NameFile, std::string buf, bool check);
     MyMapy::iterator beginMyMap();
     MyMapy::iterator endMyMap();
+    Response response;
 };
 
 #endif
