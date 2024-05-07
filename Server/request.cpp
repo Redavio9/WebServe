@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:27 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/01 15:26:06 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/07 14:45:23 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,37 +27,6 @@ int Request::read_socket(int socket)
     valread = read(socket, buffer, sizeof(buffer) - 1);  
     return (valread);
 }
-
-// void Request::remplirMyMap(int socket)
-// {
-//   LittleMap new_map;
-//   if (request.find("GET") != std::string::npos)
-//       new_map[request] = "GET";
-//   else
-//       new_map[request] = "POST";    
-//   my_map[socket] =  new_map;
-// }
-
-// void Request::CheckMethodeReq(int socket)
-// {
-//   for (MyMapy::iterator it = my_map.begin(); it != my_map.end(); it++)
-//   {
-//     if(it->first == socket)
-//     {
-//       LittleMap::iterator it1 = it->second.begin();
-//       if (it1->second == "GET")
-//       {
-//         Get = true;
-//         // std::cout << "GET" << std::endl;
-//       }
-//       else
-//       {
-//         // std::cout << "POST" << std::endl;  
-//         Get = false;
-//       }
-//     }
-//   }
-// }
 
 void Request::AddHeaderReq(int valread)
 {
@@ -113,19 +82,7 @@ void Request::AddHeaderBody()
   }
   if(!Get)
   {
-    // std::cout << body << std::endl;
     CheckChunked();
-    // if ((pos = body.find("Content-Type: ")) != std::string::npos)
-    // {
-    //   body = body.substr(pos + 14 , body.length());
-    //   body = body.substr(body.find("\n") + 3, body.length());
-    // }
-    // if ((pos = body.find("Content-Disposition: ")) != std::string::npos)
-    // {
-    //   body = body.substr(pos + 21 , body.length());
-    //   body = body.substr(body.find("\n") + 3, body.length());
-    // }
-  
     int nb = 0;
     while(true && chunked)
     {
@@ -164,12 +121,6 @@ void Request::AddHeaderBody()
 }
 void Request::CreatFiles(std::string NameFile, std::string buf, bool check)
 {
-  // std::cout << "--->" << buf << std::endl;
-  // // NameFile = "\0";
-  // std::ofstream outputFile;
-  // if (outputFile.is_open())
-  //   outputFile << buf;
-
   try 
   {
     if (check)
@@ -197,21 +148,6 @@ void Request::CreatFiles(std::string NameFile, std::string buf, bool check)
   {
     std::cerr << "Exception caught: " << e.what() << std::endl;
   }
-  
-  // std::ofstream outputFile(NameFile, std::ios::binary);
-  // std::cout << buf << std::endl;
-  // if (!outputFile.is_open()) 
-  // {
-  //     std::cout << "Error: Unable to open file " << NameFile << std::endl;
-  //     return;
-  // }
-  // outputFile << buf;
-  // outputFile.flush(); 
-  // if (!outputFile) 
-  // {
-  //     std::cout << "Error: Failed to write to file " << NameFile << std::endl;
-  // }
-  // outputFile.close();  
 }
 
 int checkImgOrText(std::string buf)
@@ -264,16 +200,37 @@ void Request::UploadFiles()
   // std::cout << Myboundary << std::endl;
 }
 
+void Request::checkQuery()
+{
+  std::string str;
+  std::string tmp;
+  std::vector<std::string> MyQeury;
+  size_t pos;
+  std::cout << "URL : " << url << std::endl;
+  if((pos = url.find("?")) != std::string::npos)
+  {
+    str = url.substr(pos+1, url.length());
+    url = url.substr(0, pos);
+  }
+  while ((pos = str.find("&")) != std::string::npos)
+  {
+    tmp = str.substr(0, pos);
+    str = str.substr(pos + 1, str.length());
+    MyQeury.push_back(tmp);
+  }
+  tmp = str.substr(0, str.length());
+  MyQeury.push_back(tmp);
+  std::cout << "----------------------QUERY---------------------------" << std::endl;
+  for (size_t i = 0; i < MyQeury.size(); i++)
+  {
+    std::cout << MyQeury[i] << std::endl;
+  }
+  std::cout << "-------------------------------------------------------" << std::endl; 
+}
+
+
 void Request::check_req_valid()
 {
-  // size_t pos;
-  // if ((pos = header.find("\r\n\r\n")) != std::string::npos)
-  // {
-  //   header = header.substr(0, pos + 2);
-  // }  
-  // std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
-  // std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
-  // std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
   // read line par line 
   std::stringstream ss(header);
   std::string buf;
@@ -281,7 +238,7 @@ void Request::check_req_valid()
   while(getline(ss, buf, '\n'))
   {
     // std::cout << "--->" << buf << std::endl;
-    //check line 1
+    // check line 1
     if (i == 0)
     {
       std::stringstream ss(buf);
@@ -300,10 +257,9 @@ void Request::check_req_valid()
         }
         if (j == 1)
         {
-          std::cout << "URL : " << buff << std::endl;
           url = buff;
           //check URL !!!!!!
-          //check qwery params
+          checkQuery();
         }
         if (j == 2)
         {
@@ -336,11 +292,10 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
   {
       buffer[valread] = '\0';
       request.append(buffer, valread); 
-      // remplirMyMap(socket);
-      // CheckMethodeReq(socket);
       AddHeaderReq(valread);
       if ((pos = request.find("Content-Length: ")) != std::string::npos)
       {
+        // check if allow methode post configfile
         Get = false;
         // std::cout << "\033[0;35m"  << "========CHUNKED========" << "\033[0m" << std::endl;
         body_lenght = std::atoi(request.substr(pos + 16,  request.find("\r\n", pos + 16) - pos + 16).c_str());
@@ -348,7 +303,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
       }
   }
 
-  // body req
+  // body req && cgi && run response
   if ((request.find("\r\n\r\n") != std::string::npos && Get) || (request.find("\r\n\r\n0") != std::string::npos && !Get) || compareLenBody >= body_lenght)
   {
       check_req_valid();
@@ -358,26 +313,23 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
       AddHeaderBody();
       if ((pos = header.find("\r\n\r\n")) != std::string::npos)
         header = header.substr(0, pos + 2);
-      // std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
-      // std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
-      // std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
-      // std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
-      // std::cout << "\033[0;33m" << new_body << "\033[0m" << std::endl;
-      // std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
       // // if (!cgi)
-        // UploadFiles();
-      // else
-        //cgi
-      // Cgi cgi;
-      // cgi.SetHeader(header);
-      // cgi.SetBody(body);
-      // cgi.run();  
-
+      // UploadFiles();
       std::cout << "herre\n";
       response.SetHeader(header);
       response.SetBody(body);
       response.SetUrl(url);
-      // response.run();
+      if (response.url.find(".py") != std::string::npos)
+      {
+        std::cout << "hnaaaaaaaaa\n";
+        response.check_cgi = true;
+        Cgi cgi;
+        cgi.SetHeader(header);
+        cgi.SetBody(body);
+        cgi.run();  
+      }
+      else
+        response.run();
       request = "";
       FD_CLR(socket, &read_fds);
       FD_SET(socket, &write_fds);
@@ -388,13 +340,4 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
   }
 }
 
-MyMapy::iterator Request::beginMyMap() 
-{
-  return my_map.begin();
-}
-
-MyMapy::iterator Request::endMyMap() 
-{
-  return my_map.end();
-}
 // Transfer-Encoding

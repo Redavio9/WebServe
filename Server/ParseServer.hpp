@@ -1,34 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   infoserv.hpp                                       :+:      :+:    :+:   */
+/*   ParseServer.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/24 10:16:42 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/04 14:55:34 by rarraji          ###   ########.fr       */
+/*   Created: 2024/05/06 09:39:06 by rarraji           #+#    #+#             */
+/*   Updated: 2024/05/06 09:40:47 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
-
-#include "map"
-#include "request.hpp"
-#include "location.hpp"
-
-class Request;
-// class Response;
-
-class infoserv
+class ParseServer
 {
   public:
-    std::string body;
-    std::map<int, std::string> ErrorPage;
-    std::string host;
-    std::string index;
-    std::string root;
     int port;
-    int MaxBodySize;
-    location location;
-    Request request;
 };

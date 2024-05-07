@@ -171,3 +171,27 @@ int main(void) {
 }
 
 
+
+// std::string generateHTML(const char* path) 
+// {
+//     std::ostringstream ss;
+//     DIR *dir = opendir(path);
+//     if (!dir) {
+//         return "";
+//     }
+
+//     ss << "<html><head><title>Directory Listing</title><style>h1 {text-align:center;}</style></head><body><h1>Directory Listing</h1><ul><br>";
+
+//     struct dirent *entry;
+//     while ((entry = readdir(dir)) != NULL) {
+//         if (entry->d_name[0] != '.') {
+//             ss << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>";
+//         }
+//     }
+
+//     ss << "</ul></body></html>";
+//     closedir(dir);
+//     return ss.str();
+// }
+
+

@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:24 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/01 13:09:50 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/07 09:47:47 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#include <vector> // Pour gérer plusieurs sockets
+#include <vector> 
 #include <map>   
 #include <fstream> 
 #include <fcntl.h>
@@ -37,14 +37,9 @@
 #include "cgi.hpp"
 #include "response.hpp"
 
-// class Response;
-
-typedef std::map<std::string, std::string> LittleMap;
-typedef std::map <int, std::map<std::string ,std::string> > MyMapy;
 
 class Request{
   private:
-    MyMapy my_map;
     std::string request;
     char buffer[2048];
     int body_lenght;
@@ -65,6 +60,7 @@ class Request{
     std::string url;
     std::string methode;
     std::string host;
+    bool check_cgi;
     Request();
     int read_socket(int socket);
     void Check_read(int socket, fd_set &read_fds, fd_set &write_fds);
@@ -77,10 +73,9 @@ class Request{
     void CheckChunked();
     void RegContent(int nb);
     void check_req_valid();
+    void checkQuery();
     void UploadFiles();
     void CreatFiles(std::string NameFile, std::string buf, bool check);
-    MyMapy::iterator beginMyMap();
-    MyMapy::iterator endMyMap();
     Response response;
 };
 

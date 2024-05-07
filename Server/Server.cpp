@@ -6,40 +6,44 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/01 15:45:12 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/07 09:42:17 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include <iostream>
-#include <sstream>
-#include <cstring>
-#include <cstdlib>
-#include <cstdio>
-#include <sys/select.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <errno.h>
-#include <vector> // Pour gérer plusieurs sockets
-#include <map>   
-#include <fstream> 
-#include <fcntl.h>
-#include <cerrno>
-#include <cstring>
-#include <unistd.h>
 #include <thread>
-
 
 Server::Server() 
 {
+    s = 0;
+    se = 0;
     server_socket_1 = create_server_socket(PORT_1);
     server_socket_2 = create_server_socket(PORT_2);
     server_socket_3 = create_server_socket(PORT_3);
+    // int NumberServerSocker = 3;
+    // for (size_t i = 0; i < NumberServerSocker; i++)
+    // {
+    //     int server_socket_1 = create_server_socket(serverSockets[i].port);
+    // }
+    
 }
 
+
+
+void Server::RemplirInfo(int socket_fd)
+{
+    infoserv info;
+    // set root
+    // set host
+    // set port
+    // set location
+    // set error page
+    // set index
+    // set maxBodySize
+    mapinfo.insert(std::make_pair(socket_fd, info));
+}
+
+// add ip addresse;
 int Server::create_server_socket(int port) 
 {
     struct sockaddr_in sa;
@@ -47,20 +51,19 @@ int Server::create_server_socket(int port)
     int status;
 
     memset(&sa, 0, sizeof sa);
-    sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    sa.sin_port = htons(port);
+    sa.sin_family = AF_INET; 
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);   //ip server
+    sa.sin_addr.s_addr = inet_addr("0.0.0.0"); //change ip 0.0.0.0 to myip
+    sa.sin_port = htons(port); // port server
 
-    socket_fd = socket(AF_INET, SOCK_STREAM,   0);
+    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_fd == -1) 
     {
         std::cerr << "[Server] Socket error: " << strerror(errno) << std::endl;
         return (-1);
     }
-
-    infoserv info;
-    //3mer zwar info 3ad pushit s map
-    mapinfo.insert(std::make_pair(socket_fd, info));
+    RemplirInfo(socket_fd);
+    // mapinfo.insert(std::make_pair(socket_fd, info));
     std::cout << "[Server] Created server socket fd: " << socket_fd << std::endl;
 
     status = bind(socket_fd, (struct sockaddr *)&sa, sizeof sa);
@@ -115,10 +118,19 @@ void Server::run()
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
 
+
+    // boucler sur les socket
+    // for (size_t i = 0; i < Sockets.size(); i++)
+    // {
+    //     FD_SET(Sockets[i], &read_fds);
+    // }
+    
+    
     FD_SET(server_socket_1, &read_fds);
     FD_SET(server_socket_2, &read_fds);
     FD_SET(server_socket_3, &read_fds);
 
+    //fd_max les socket 
     fd_max = std::max(server_socket_1, std::max(server_socket_2, server_socket_3));
     std::cout << "[Server] Set up select fd sets\n";
 
@@ -141,8 +153,10 @@ void Server::run()
         //     continue;
         // }
 
-        for (int i =  3; i <= fd_max; i++) 
+        // boucler number of socket 
+        for (int i = 3; i <= fd_max; i++) 
         {
+            struct stat sb;
             if (FD_ISSET(i, &copy_read_fds)) 
             {
                 if (i == server_socket_1 || i == server_socket_2 || i == server_socket_3) 
@@ -166,10 +180,34 @@ void Server::run()
                 std::cout << "************************************\n";
                 mapinfo[i].request.response.run();
                 std::cout << "************************************\n";
-                send(i,  mapinfo[i].request.response.SendResponse.c_str(), mapinfo[i].request.response.SendResponse.size(), 0);
-                FD_CLR(i,&write_fds);
-                close(i);
-                std::cout << "\033[0;35m" << "---------->>>>>CLOSE-SOCKET<<<<<-------- : " << i << "\033[0m" << std::endl;
+                s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + se, mapinfo[i].request.response.SendResponse.size() - se, 0);
+                se += s;
+                std::cout << "s == " << s << std::endl;
+                std::cout << "se == " << se << std::endl;
+                std::cout << "size == " << mapinfo[i].request.response.SendResponse.size() << std::endl;
+                // std::string newsend = mapinfo[i].request.response.SendResponse.c_str() + s;
+                if(se == mapinfo[i].request.response.SendResponse.size())
+                {
+                    // s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + s, mapinfo[i].request.response.SendResponse.size(), 0);
+                    FD_CLR(i,&write_fds);
+                    close(i);
+                    if (stat("./output.txt", &sb) == 0)
+                        std::remove("./output.txt");
+                    std::cout << "\033[0;35m" << "---------->>>>>CLOSE-SOCKET<<<<<-------- : " << i << "\033[0m" << std::endl;
+                    s = 0;
+                    se = 0;
+                }
+                if(s == -1)
+                {
+                    // s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + s, mapinfo[i].request.response.SendResponse.size(), 0);
+                    FD_CLR(i,&write_fds);
+                    close(i);
+                    if (stat("./output.txt", &sb) == 0)
+                        std::remove("./output.txt");
+                    std::cout << "\033[0;35m" << "---------->>>>>CLOSE-SOCKET<<<<<-------- : " << i << "\033[0m" << std::endl;
+                    // s = 0;
+                    se = 0;
+                }
             }
             
         }

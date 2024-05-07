@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:14 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/01 13:17:49 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/07 16:09:46 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,58 +34,39 @@
 #include <cstring>
 #include <unistd.h>
 #include <thread>
-// #include "request.hpp"
 #include "infoserv.hpp"
+#include "ParseServer.hpp"
 
-#define PORT_2   8008  // le port de notre deuxième serveur
-#define PORT_1   8006   // le port de notre premier serveur
-#define PORT_3   8005  // le port de notre troisième serveur
-
-// typedef std::map<std::string, std::string> LittleMap;
-// typedef std::map <int, std::map<std::string ,std::string> > MyMapy;
+#define PORT_1   8009
+#define PORT_3   8006
+#define PORT_2   8008  
 
 class infoserv;
 
-// paramètre req
-typedef struct param_req
-{
-  std::string path;
-  std::string version_http;
-  std::string ip;
-  std::string port;
-  std::string methode;
-  
-} param_req;
-// typedef struct client_fd
-// {
-//   std::string request;
-//   std::string header;
-//   std::string body;
-//   // std::string port;
-//   // std::string methode;
-// } param_req;
 
 class Server 
 {
   private:
-    // Request request;
     int server_socket_1;
     int server_socket_2;
     int server_socket_3;
-    // std::string body;
-    param_req param_req_one;
+    std::vector<ParseServer> serverSockets;
+    std::vector<int> Sockets;
     int create_server_socket(int port);
     void accept_new_connection(int listener_socket, fd_set &read_fds, int *fd_max);
     void read_data_from_socket(int socket, fd_set &read_fds, fd_set &write_fds);
     void parse_req(std::string buffer);
-    void readLine(int socket, fd_set &read_fds, fd_set &write_fds);
-    void readBody(int socket, std::string& body);
+    // void readLine(int socket, fd_set &read_fds, fd_set &write_fds);
+    // void readBody(int socket, std::string& body);
     
   public:
+    long long s;
+    size_t se;
     Server();
     void run();
+    void RemplirInfo(int socket_fd);
     std::map <int, infoserv> mapinfo;
     
 };
 
-#endif // SERVER_HPP
+#endif

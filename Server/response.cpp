@@ -6,15 +6,17 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 10:17:38 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/01 15:43:37 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/07 16:09:36 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "response.hpp"
+#include<dirent.h>
+
 
 Response::Response()
 {
-  
+//   check_cgi = false;
 }
 Response::~Response()
 {
@@ -47,61 +49,94 @@ std::string Response::GetBody()
   return(this->body);
 }
 
+std::string Response::generateHTML(const char* path) 
+{
+                // SendResponse = "HTTP/1.1 200 OK\r\n";
+    std::ostringstream ss;
+    DIR *dir = opendir(path);
+    if (!dir) {
+        return "";
+    }
+
+    ss << "<html><head><title>Directory Listing</title><style>h1 {text-align:center;}</style></head><body><h1>Directory Listing</h1><ul><br>";
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_name[0] != '.') {
+            ss << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>";
+        }
+    }
+
+    ss << "</ul></body></html>";
+    closedir(dir);
+    return ss.str();
+}
+
+
+
 void Response::run()
 {
-  std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
-  std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
-  std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
-  std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
-  std::cout << "\033[0;33m" << body << "\033[0m" << std::endl;
-  std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
+//   std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
+//   std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
+//   std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
+//   std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
+//   std::cout << "\033[0;33m" << body << "\033[0m" << std::endl;
+//   std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
   
                 std::string test = "/";
                 std::string test1 = "/favicon.ico";
                 std::string path = "./pages";
                 std::string new_path = "./pages";
-                // std::cout << "----> " << url << std::endl;
-                if (url.compare("/home") == 0)
-                    url = "/home";
-                if (url.compare("/favicon.ico") == 0)
-                    url = "./images/rarraji.jpg";
-                if (url.compare("/") == 0)
-                    url = "/index";
-                if (url.compare("/upload") == 0)
-                    url = "/upload";
-                if (url.compare("/images/rarraji.jpg") == 0)
-                    url = "./images/rarraji.jpg";
-                if (url.compare("/images/bel-kdio.jpg") == 0)
-                    url = "./images/bel-kdio.jpg";
-                if (url.compare("/images/maxresdefault.jpg") == 0)
-                    url = "./images/maxresdefault.jpg";
-                if (url.compare("/images/vedeo.mp4") == 0)
-                    url = "./images/vedeo.mp4";
-                // if(mapinfo[i].request.methode.compare("POST") == 0)
-                //     url = "../fichier.txt";          
-                if (url.compare("./images/rarraji.jpg") != 0 && url.compare("./images/bel-kdio.jpg") != 0 && url.compare("./images/maxresdefault.jpg") && url.compare("./images/vedeo.mp4") && url.compare("../fichier.txt") != 0)
+                std::cout << "----> " << check_cgi << std::endl;
+
+                if (check_cgi == false)
                 {
-                    new_path += url + ".html";
-                    std::cout << new_path << std::endl;
-                    std::cout << "HERE2\n";
-                }   
-                else
-                {
-                    new_path = url;
-                    // std::cout << "HERE1\n";
+                    if (url.compare("/ErrorPages"))
+                        url = "./ErrorPages";
+                    if (url.compare("/home") == 0)
+                        url = "/home";
+                    if (url.compare("/favicon.ico") == 0)
+                        url = "./images/rarraji.jpg";
+                    if (url.compare("/") == 0)
+                        url = "/index";
+                    if (url.compare("/upload") == 0)
+                        url = "/upload";
+                    if (url.compare("/images/rarraji.jpg") == 0)
+                        url = "./images/rarraji.jpg";
+                    if (url.compare("/images/bel-kdio.jpg") == 0)
+                        url = "./images/bel-kdio.jpg";
+                    if (url.compare("/images/maxresdefault.jpg") == 0)
+                        url = "./images/maxresdefault.jpg";
+                    if (url.compare("/images/vedeo.mp4") == 0)
+                        url = "./images/vedeo.mp4";     
+                    if (url.compare("./images/rarraji.jpg") != 0 && url.compare("./images/bel-kdio.jpg") != 0 && url.compare("./images/maxresdefault.jpg") && url.compare("./images/vedeo.mp4") && url.compare("../fichier.txt") != 0 && url.compare("/ErrorPages") != 0 )
+                    {
+                        new_path += url + ".html";
+                        std::cout << new_path << std::endl;
+                        std::cout << "HERE2\n";
+                    }   
+                    else
+                    {
+                        new_path = url;
+                        // std::cout << "HERE1\n";
+                    }
                 }
+                else
+                    new_path = "./output.txt";
                     
-                // std::cout << new_path << std::endl;
+                std::cout << "new_path : "<< new_path << std::endl;
         
-                // std::string response;
                 std::stringstream buffer;
                 SendResponse = "HTTP/1.1 200 OK\r\n";
-
-                // if(param_req_one.)
-
-
                 
-                if (new_path.compare("./images/rarraji.jpg") == 0 || new_path.compare("./images/bel-kdio.jpg") == 0 || new_path.compare("/images/maxresdefault.jpg") == 0)
+                if (url.compare("./ErrorPages") == 0)
+                {
+                    std::cout << "hiii" << std::endl;
+                    SendResponse += "Content-Type: text/html\r\n";      
+                    SendResponse += "\r\n";
+                    SendResponse += generateHTML(url.c_str());
+                }
+                else if (new_path.compare("./images/rarraji.jpg") == 0 || new_path.compare("./images/bel-kdio.jpg") == 0 || new_path.compare("/images/maxresdefault.jpg") == 0)
                 {
                     std::ifstream file(new_path.c_str(), std::ios::binary);
                     if (!file.is_open()) 
@@ -131,20 +166,6 @@ void Response::run()
                     fi << buffer.rdbuf();
                     SendResponse += "Content-Type: video/mp4\r\n";
                 }
-                else if (new_path.compare("../fichier.txt") == 0)
-                {
-                    std::ofstream file_1("../image.txt");
-                    // std::ofstream file_1(new_path.c_str());
-                    if (!file_1.is_open()) 
-                    {
-                        std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
-                    }
-                    file_1 << body;
-                    // this->body = '\0';
-                    buffer << file_1.rdbuf();
-                    file_1.close();
-                }
-                
                 else
                 {
                     std::ifstream file(new_path.c_str());
@@ -156,9 +177,10 @@ void Response::run()
                     file.close();
                     SendResponse += "Content-Type: text/html\r\n";                    
                 }
-                // std::string SendResponse = "hello";
-                SendResponse += "\r\n";
-                // SendResponse += SendResponse.append(buffer.str(), sizeof(buffer));
-                SendResponse += buffer.str();
-                // send(i, SendResponse.c_str(), SendResponse.size(), 0);
+                if (url.compare("/ErrorPages") != 0)
+                {
+                    SendResponse += "\r\n";
+                    SendResponse += buffer.str();
+                }
+                check_cgi = false;
 }

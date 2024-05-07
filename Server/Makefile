@@ -6,7 +6,7 @@
 #    By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/22 10:15:25 by rarraji           #+#    #+#              #
-#    Updated: 2024/04/30 13:01:52 by rarraji          ###   ########.fr        #
+#    Updated: 2024/05/07 15:18:09 by rarraji          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME    = Server
 CC      = c++
 FLAGS   = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
 RM      = rm -rf
-SRC     = main.cpp Server.cpp request.cpp cgi.cpp response.cpp infoserv.cpp
+SRC     = main.cpp Server.cpp request.cpp cgi.cpp response.cpp infoserv.cpp location.cpp ParseServer.cpp
 OBJ     = $(SRC:.cpp=.o) 
 
 # Colors
