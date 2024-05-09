@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 10:17:38 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/07 16:09:36 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/09 16:54:09 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,47 +88,68 @@ void Response::run()
                 std::string path = "./pages";
                 std::string new_path = "./pages";
                 std::cout << "----> " << check_cgi << std::endl;
+                std::cout << "---->" << url << "<----"<< std::endl;
+                int check = true;
 
                 if (check_cgi == false)
                 {
-                    if (url.compare("/ErrorPages"))
-                        url = "./ErrorPages";
-                    if (url.compare("/home") == 0)
-                        url = "/home";
+                    // if (url.compare("/ErrorPages") == 0)
+                    // {
+                    //     std::cout << "i am here 1" << std::endl;
+                    //     url = "./ErrorPages";
+                    // }
+                    // if (url.compare("/home") == 0)
+                    //     url = "/home";
                     if (url.compare("/favicon.ico") == 0)
-                        url = "./images/rarraji.jpg";
-                    if (url.compare("/") == 0)
-                        url = "/index";
-                    if (url.compare("/upload") == 0)
-                        url = "/upload";
-                    if (url.compare("/images/rarraji.jpg") == 0)
-                        url = "./images/rarraji.jpg";
-                    if (url.compare("/images/bel-kdio.jpg") == 0)
-                        url = "./images/bel-kdio.jpg";
-                    if (url.compare("/images/maxresdefault.jpg") == 0)
-                        url = "./images/maxresdefault.jpg";
-                    if (url.compare("/images/vedeo.mp4") == 0)
-                        url = "./images/vedeo.mp4";     
-                    if (url.compare("./images/rarraji.jpg") != 0 && url.compare("./images/bel-kdio.jpg") != 0 && url.compare("./images/maxresdefault.jpg") && url.compare("./images/vedeo.mp4") && url.compare("../fichier.txt") != 0 && url.compare("/ErrorPages") != 0 )
                     {
-                        new_path += url + ".html";
-                        std::cout << new_path << std::endl;
-                        std::cout << "HERE2\n";
-                    }   
-                    else
-                    {
-                        new_path = url;
-                        // std::cout << "HERE1\n";
+                        std::cout << "jiji"<< url << std::endl;
+                        check = false;
+                        url = "/Users/rarraji/Desktop/lastWeb/Server/pages/images/rarraji.jpg";
                     }
+                    if (url.compare("/") == 0)
+                    {
+                        std::cout << "jiji"<< url << std::endl;
+                        check = false;
+                        url = "/Users/rarraji/Desktop/lastWeb/Server/pages/index.html";
+                    }
+                    // if (url.compare("/upload") == 0)
+                    //     url = "/upload";
+                    // if (url.compare("/images/rarraji.jpg") == 0)
+                    //     url = "./images/rarraji.jpg";
+                    // if (url.compare("/images/bel-kdio.jpg") == 0)
+                    //     url = "./images/bel-kdio.jpg";
+                    // if (url.compare("/images/maxresdefault.jpg") == 0)
+                    //     url = "./images/maxresdefault.jpg";
+                    // if (url.compare("/images/vedeo.mp4") == 0)
+                    //     url = "./images/vedeo.mp4"; 
+                        
+                    // if(url.compare("./ErrorPages") == 0)
+                    // {
+                    //     std::cout << "i am here\n";
+                    //     new_path = url;        
+                    // }
+                    // else if (url.compare("./images/rarraji.jpg") != 0 && url.compare("./images/bel-kdio.jpg") != 0 && url.compare("./images/maxresdefault.jpg") && url.compare("./images/vedeo.mp4") && url.compare("../fichier.txt") != 0)
+                    // {
+                    //     new_path += url + ".html";
+                    //     std::cout << new_path << std::endl;
+                    //     std::cout << "HERE2\n";
+                    // }   
+                    // else
+                    // {
+                    //     new_path = url;
+                    //     // std::cout << "HERE1\n";
+                    // }
                 }
                 else
-                    new_path = "./output.txt";
-                    
-                std::cout << "new_path : "<< new_path << std::endl;
-        
+                    url = "./output.txt";
+                std::cout << "url : "<< url << std::endl;
                 std::stringstream buffer;
                 SendResponse = "HTTP/1.1 200 OK\r\n";
-                
+                std::string new_url;
+                if(check == true)
+                    new_url = "/Users/rarraji/Desktop/lastWeb/Server/pages" + url;
+                else
+                    new_url = url;    
                 if (url.compare("./ErrorPages") == 0)
                 {
                     std::cout << "hiii" << std::endl;
@@ -136,9 +157,10 @@ void Response::run()
                     SendResponse += "\r\n";
                     SendResponse += generateHTML(url.c_str());
                 }
-                else if (new_path.compare("./images/rarraji.jpg") == 0 || new_path.compare("./images/bel-kdio.jpg") == 0 || new_path.compare("/images/maxresdefault.jpg") == 0)
+                else if (url.find(".jpg") != std::string::npos)
                 {
-                    std::ifstream file(new_path.c_str(), std::ios::binary);
+                    std::cout << "new_url : "<< new_url << std::endl;
+                    std::ifstream file(new_url.c_str(), std::ios::binary);
                     if (!file.is_open()) 
                     {
                         std::cerr << "[Server] Impossible d'ouvrir image " << "\n";
@@ -148,9 +170,10 @@ void Response::run()
                     file.close();
                     SendResponse += "Content-Type: image/jpg\r\n";
                 }
-                else if (new_path.compare("./images/vedeo.mp4") == 0)
+                else if (url.compare("/images/vedeo.mp4") == 0)
                 {
-                    std::ifstream file(new_path.c_str(), std::ios::binary);
+                    std::cout << "new_url : "<< new_url << std::endl;
+                    std::ifstream file(new_url.c_str(), std::ios::binary);
                     if (!file.is_open()) 
                     {
                         std::cerr << "[Server] Impossible d'ouvrir le vedeo " << "\n";
@@ -165,13 +188,25 @@ void Response::run()
                     }
                     fi << buffer.rdbuf();
                     SendResponse += "Content-Type: video/mp4\r\n";
+                    // exit(1);
                 }
                 else
                 {
-                    std::ifstream file(new_path.c_str());
+                    std::cout << "new_url : "<< new_url << std::endl;
+                    std::ifstream file(new_url.c_str());
+                    // int check = 1;
                     if (!file.is_open()) 
                     {
-                        std::cerr << "[Server] Impossible d'ouvrir le fichier " << "\n";
+                        file.close();
+                        std::ifstream file("/Users/rarraji/Desktop/lastWeb/Server/pages/ErrorPages/notFound.html");
+                        // check = 0;
+                        if (!file.is_open())
+                        {
+                         std::cerr << "[Server 404] Impossible d'ouvrir le fichier here" << "\n";
+                        }
+                        std::cerr << "[Server] Impossible d'ouvrir le fichier here" << "\n";
+                        buffer << file.rdbuf();
+                        file.close();
                     }
                     buffer << file.rdbuf();
                     file.close();
@@ -179,8 +214,13 @@ void Response::run()
                 }
                 if (url.compare("/ErrorPages") != 0)
                 {
+                    // std::cout << "[Server]" << "\n";
                     SendResponse += "\r\n";
                     SendResponse += buffer.str();
+                    // std::cout << "---------------------------------"  << std::endl;
+                    // std::cout << "SendResponse : " << buffer.str() << std::endl;
+                    // std::cout << "---------------------------------"  << std::endl;
                 }
                 check_cgi = false;
+                check = true;
 }

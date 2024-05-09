@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:24 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/07 09:47:47 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/08 10:34:41 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ class Request{
     std::string methode;
     std::string host;
     bool check_cgi;
+    long long s;
+    size_t se;
     Request();
     int read_socket(int socket);
     void Check_read(int socket, fd_set &read_fds, fd_set &write_fds);

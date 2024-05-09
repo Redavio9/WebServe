@@ -32,14 +32,12 @@ int create_server_socket(void)
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
-
     status = bind(socket_fd, (struct sockaddr *)&sa, sizeof(sa));
     if (status == -1) 
     {
         perror("Bind failed");
         exit(EXIT_FAILURE);
     }
-
     return socket_fd;
 }
 
@@ -57,7 +55,8 @@ void accept_new_connection(int server_socket, fd_set *all_sockets, int *fd_max)
     socklen_t addr_len = sizeof(client_addr);
 
     client_fd = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len);
-    if (client_fd == -1) {
+    if (client_fd == -1) 
+    {
         perror("Accept failed");
         exit(EXIT_FAILURE);
     }

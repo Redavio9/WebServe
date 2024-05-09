@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:27 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/07 14:45:23 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/09 10:17:58 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ Request::Request()
   Get = true;
   last = true;
   start = 0;
+  s = 0;
+  se = 0;
 }
 
 int Request::read_socket(int socket)
@@ -163,6 +165,7 @@ void Request::UploadFiles()
   bool check = false;
   getline(ss,buf);
   std::string Myboundary = buf.substr(0 , buf.length() - 1);
+  std::cout << "=====================================ana hna" << std::endl;
   while (getline(ss,buf))
   {
     size_t pos;
@@ -314,7 +317,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
       if ((pos = header.find("\r\n\r\n")) != std::string::npos)
         header = header.substr(0, pos + 2);
       // // if (!cgi)
-      // UploadFiles();
+      UploadFiles();
       std::cout << "herre\n";
       response.SetHeader(header);
       response.SetBody(body);
