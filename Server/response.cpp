@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 10:17:38 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/09 16:54:09 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/05/09 19:26:16 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ void Response::run()
                 std::stringstream buffer;
                 SendResponse = "HTTP/1.1 200 OK\r\n";
                 std::string new_url;
-                if(check == true)
+                if(url.find("/Users/rarraji/Desktop/lastWeb/Server/pages") == std::string::npos)
                     new_url = "/Users/rarraji/Desktop/lastWeb/Server/pages" + url;
                 else
                     new_url = url;    
@@ -159,7 +159,7 @@ void Response::run()
                 }
                 else if (url.find(".jpg") != std::string::npos)
                 {
-                    std::cout << "new_url : "<< new_url << std::endl;
+                    std::cout << "->new_url : "<< new_url << std::endl;
                     std::ifstream file(new_url.c_str(), std::ios::binary);
                     if (!file.is_open()) 
                     {
