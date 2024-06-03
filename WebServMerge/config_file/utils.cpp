@@ -48,3 +48,40 @@ std::string utils::trim_space_from_back(std::string str) {
     }
     return std::string(str.substr(0, i));
 }
+
+int utils::deletePath(const char* path) 
+{
+    if (std::remove(path) == 0) 
+    {
+        std::cout << "Deleted successfully" << std::endl;
+        return 0;
+    } 
+    else 
+    {
+        std::cerr << "Unable to delete the file or directory" << std::endl;
+        return -1;
+    }
+}
+
+void utils::removeDirectoryRecursively(const char *path) 
+{
+    DIR *dir;
+    struct dirent *entry;
+    char fullPath[PATH_MAX];
+    if ((dir = opendir(path)) == NULL) {
+        perror("opendir");
+        return;
+    }
+    while ((entry = readdir(dir))!= NULL) {
+        if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")) {
+            snprintf(fullPath, sizeof(fullPath), "%s/%s", path, entry->d_name);
+            if (entry->d_type == DT_DIR) {
+                removeDirectoryRecursively(fullPath);
+            } else {
+                unlink(fullPath);
+            }
+        }
+    }
+    closedir(dir);
+    rmdir(path);
+}

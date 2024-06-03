@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/25 15:53:48 by rarraji           #+#    #+#             */
-/*   Updated: 2024/06/03 15:16:59 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/06/03 19:40:25 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,6 +283,7 @@ void Server::accept_new_connection(int listener_socket, fd_set &read_fds, int *f
 void Server::read_data_from_socket(int socket, fd_set &read_fds, fd_set &write_fds) 
 {
     mapinfo[socket].request.root =  mapinfo[socket].root;
+    mapinfo[socket].request.location = mapinfo[socket].location;
     // std::cout << "mapinfo[socket].request.root" << mapinfo[socket].request.root << std::endl;
     mapinfo[socket].request.MaxBodySize =  mapinfo[socket].MaxBodySize;
     mapinfo[socket].request.Check_read(socket, read_fds, write_fds);
@@ -538,9 +539,9 @@ void Server::checkResponse1(int sock, std::string host)
                 struct stat fileStat;
                 std::string tmp1;
                 mapinfo[sock].request.response.redur = false;
-                // std::cout << "url : " << mapinfo[sock].request.response.url << std::endl;
-                // std::cout << "url req: " << mapinfo[sock].request.url << std::endl;
-                // std::cout << "root + url : " <<  mapinfo[sock].root +  mapinfo[sock].request.response.url << std::endl;
+                std::cout << "url : " << mapinfo[sock].request.response.url << std::endl;
+                std::cout << "url req: " << mapinfo[sock].request.url << std::endl;
+                std::cout << "root + url : " <<  mapinfo[sock].root +  mapinfo[sock].request.response.url << std::endl;
                 if (mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)// cheak url isgisila root      //!!!!!
                 {
                     tmp1 = this->mapinfo[sock].root;    //!!!!!
@@ -562,7 +563,7 @@ void Server::checkResponse1(int sock, std::string host)
 
                     if (S_ISDIR(fileStat.st_mode))
                     {
-                        // std::cout << "dossier\n";
+                        std::cout << "dossier\n";
                         std::string tmp  = tmp1;
 
                         //check_if_location_end "/"
@@ -573,7 +574,7 @@ void Server::checkResponse1(int sock, std::string host)
                         //     ////////std::cout << "ikan\n";
                         //     ////////std::cout << "redirect_URL : " << this->servers[i].get_location(mapinfo[socket].request.response.url).get_redirect_url() << std::endl;
                         // }
-                        if(tmp[tmp.length() - 1] != '/')
+                        if(tmp[tmp.length() - 1] != '/' && mapinfo[sock].request.methode != "DELETE")
                         {
                             mapinfo[sock].request.url += '/';
                             mapinfo[sock].request.response.url += '/'; 
@@ -583,174 +584,181 @@ void Server::checkResponse1(int sock, std::string host)
                             std::cout << "hnaaaa a3chir \n";
                             return;  
                         }
-                        //std::cout << "============================================" << std::endl;
+                        std::cout << "methode : "<< mapinfo[sock].request.methode << std::endl;
+                        std::cout << "errorpage : "<< mapinfo[sock].request.response.errorpage << std::endl;
+                        if(mapinfo[sock].request.methode != "DELETE")
+                        {
+                            
+                            //std::cout << "============================================" << std::endl;
+                            
+                            // for (std::map<std::string, location_param>::iterator it = mapinfo[sock].location.begin(); it !=  mapinfo[sock].location.end(); ++it)
+                            // {
+                            //     //std::cout << it->first << std::endl;
+                            // }
+                            //std::cout << "============================================" << std::endl;
                         
-                        for (std::map<std::string, location_param>::iterator it = mapinfo[sock].location.begin(); it !=  mapinfo[sock].location.end(); ++it)
-                        {
-                            //std::cout << it->first << std::endl;
-                        }
-                        //std::cout << "============================================" << std::endl;
-                    
-                        //std::cout << "this->mapinfo[sock].get_location_first(mapinfo[sock].request.url)" << this->mapinfo[sock].get_location_first(mapinfo[sock].request.url) << std::endl;
-                        if(this->mapinfo[sock].get_location_first(mapinfo[sock].request.url ).compare((mapinfo[sock].request.url)) == 0) 
-                        {
-                            // check_red = true;
-                            //std::cout << "DONE IS LOCATION" << std::endl;
+                            //std::cout << "this->mapinfo[sock].get_location_first(mapinfo[sock].request.url)" << this->mapinfo[sock].get_location_first(mapinfo[sock].request.url) << std::endl;
+                            if(this->mapinfo[sock].get_location_first(mapinfo[sock].request.url ).compare((mapinfo[sock].request.url)) == 0) 
+                            {
+                                // check_red = true;
+                                //std::cout << "DONE IS LOCATION" << std::endl;
+                            }
+                            else
+                            {
+                                //std::cout << "ISN'T LOCATION" << std::endl;
+                                j = 1;
+                            }
+                            
+                            // if (j == 0 && tmp[tmp.length() - 1] != '/')
+                            // {
+                            //     // //////std::cout << "ikan1\n";
+                            //     // if(check_red == true)
+                            //     //std::cout << "1-redirect_URL : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url() << std::endl;
+                            //     mapinfo[sock].request.response.redur = true;
+                            //     mapinfo[sock].request.response.new_redur = mapinfo[sock].request.response.url;
+                            //     ////////std::cout << "new_url_to_red : " << mapinfo[socket].request.response.new_redur << std::endl;
+                            //     j = 1;
+                            //     return;
+                            // }
+                            //check red url 
+                            if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url().length() >= 1)
+                            {
+                                // std::cout << "2-redirect_URL : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url() << std::endl;
+                                mapinfo[sock].request.response.redur = true;
+                                mapinfo[sock].request.response.new_redur = mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url();
+                                //std::cout << "2-new_url_to_red : " << mapinfo[sock].request.response.new_redur << std::endl;
+                                j = 1;
+                                return;
+                                //check_redirect_URL
+                            }
+                            else
+                                mapinfo[sock].request.response.redur = false;
+                            // for (std::map<std::string, bool>::iterator it = mapinfo[sock].get_location(mapinfo[sock].request.url).MapMethods.begin(); it != mapinfo[sock].get_location(mapinfo[sock].request.url).MapMethods.end(); ++it)
+                            // {
+                            //     //check methodes
+                            // }
+                            // if(j == 0)
+                                // std::cout << "index To serve : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_index().length() << std::endl;
+                            // //std::cout << mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") << std::endl;   
+                            // //std::cout << "'" << mapinfo[sock].request.url << "'" << std::endl;    
+                            if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_index().length() > 1)
+                            {
+                            //  mapinfo[sock].request.response.root = mapinfo[sock].get_root() + mapinfo[sock].request.url;
+                                if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") != true)
+                                {
+                                    // std::cout << "orghin tli adada\n";
+                                    mapinfo[sock].request.response.status = 501;
+                                    if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
+                                    {
+                                        mapinfo[sock].request.response.errorpage = 1;
+                                        mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
+                                    }
+                                    else
+                                        mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
+                                    // mapinfo[sock].request.response.url = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/notImplemented.html";
+                                    return;
+                                }
+                                //std::cout << "hna "<< mapinfo[sock].get_location(mapinfo[sock].request.url).get_index() << std::endl;
+                                // mapinfo[sock].request.response.new_redur = mapinfo[sock].get_location(mapinfo[sock].request.url).get_index(); //!!!!
+                                mapinfo[sock].request.response.url = mapinfo[sock].root;    //!!!!!
+                                mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location_first(mapinfo[sock].request.url);
+                                mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location(mapinfo[sock].request.url).get_index();
+                                
+                                // mapinfo[sock].request.response.redur = true;  //!!!!!!
+                                // mapinfo[sock].get_location(mapinfo[sock].request.url)
+                                
+                                // std::cout << "root : " << mapinfo[sock].root << std::endl;
+                                // std::cout << "location : " << mapinfo[sock].get_location_first(mapinfo[sock].request.url) << std::endl;
+                                // std::cout << "index To serve : " << mapinfo[sock].request.response.url << std::endl;
+                                j = 1;
+                                return;
+                            }
+                            // //////std::cout << "directory_listing :" << mapinfo[sock].get_location(mapinfo[sock].request.response.url).get_directory_listing() << std::endl;
+                            if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_directory_listing().compare("true") == 0)
+                            {
+                                if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") != true)
+                                {
+                                    // std::cout << "orghin tli adada\n";
+                                    mapinfo[sock].request.response.status = 501;
+                                    if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
+                                    {
+                                        mapinfo[sock].request.response.errorpage = 1;
+                                        mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
+                                    }
+                                    else
+                                        mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
+                                    // mapinfo[sock].request.response.url = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/notImplemented.html";
+                                    return;
+                                }
+                                // std::cout << "DONE directory_listing" << std::endl;  
+                                mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.response.url;
+                                mapinfo[sock].request.response.directory_listing = true;
+                                return;
+                            }
+                            else
+                            {
+                                if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") != true)
+                                {
+                                    // std::cout << "orghin tli adada\n";
+                                    mapinfo[sock].request.response.status = 501;
+                                    if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
+                                    {
+                                        mapinfo[sock].request.response.errorpage = 1;
+                                        mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
+                                    }
+                                    else
+                                        mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
+                                    // mapinfo[sock].request.response.url = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/notImplemented.html";
+                                    return;
+                                }
+                                if (mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)// cheak url isgisila root
+                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.response.url;     //!!!!!
+                                // mapinfo[sock].request.response.redur = true;
+                                mapinfo[sock].request.response.new_redur = mapinfo[sock].request.response.url + "index.html";
+                                
+                                return;
+                            }
+                            return;
                         }
                         else
                         {
-                            //std::cout << "ISN'T LOCATION" << std::endl;
-                            j = 1;
+                            if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") != true)
+                            {
+                                    // std::cout << "orghin tli adada\n";
+                                    mapinfo[sock].request.response.status = 501;
+                                    if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
+                                    {
+                                        mapinfo[sock].request.response.errorpage = 1;
+                                        mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
+                                    }
+                                    else
+                                        mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
+                                    // mapinfo[sock].request.response.url = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/notImplemented.html";
+                                    return;
+                            }
+                            if (mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)// cheak url isgisila root      //!!!!!
+                                mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.response.url;
+                            // mapinfo[sock].request.response.url = mapinfo[sock].get_root() + mapinfo[sock].request.response.url;
+                            //////std::cout << "FILE : " << mapinfo[sock].request.response.url << std::endl;
+                            //////std::cout << "File Done" << std::endl;
+                            return;    
                         }
-                        
-                        // if (j == 0 && tmp[tmp.length() - 1] != '/')
-                        // {
-                        //     // //////std::cout << "ikan1\n";
-                        //     // if(check_red == true)
-                        //     //std::cout << "1-redirect_URL : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url() << std::endl;
-                        //     mapinfo[sock].request.response.redur = true;
-                        //     mapinfo[sock].request.response.new_redur = mapinfo[sock].request.response.url;
-                        //     ////////std::cout << "new_url_to_red : " << mapinfo[socket].request.response.new_redur << std::endl;
-                        //     j = 1;
-                        //     return;
-                        // }
-                        //check red url 
-                        if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url().length() >= 1)
+                    }
+                    else
+                    {
+                        std::cout << "tmp1 : " << tmp1 << std::endl;
+                        mapinfo[sock].request.response.status = 404;
+                        if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
                         {
-                            // std::cout << "2-redirect_URL : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url() << std::endl;
-                            mapinfo[sock].request.response.redur = true;
-                            mapinfo[sock].request.response.new_redur = mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url();
-                            //std::cout << "2-new_url_to_red : " << mapinfo[sock].request.response.new_redur << std::endl;
-                            j = 1;
-                            return;
-                            //check_redirect_URL
+                            mapinfo[sock].request.response.errorpage = 1;
+                            mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "NOT-FOUND");
                         }
                         else
-                            mapinfo[sock].request.response.redur = false;
-                        // for (std::map<std::string, bool>::iterator it = mapinfo[sock].get_location(mapinfo[sock].request.url).MapMethods.begin(); it != mapinfo[sock].get_location(mapinfo[sock].request.url).MapMethods.end(); ++it)
-                        // {
-                        //     //check methodes
-                        // }
-                        // if(j == 0)
-                            // std::cout << "index To serve : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_index().length() << std::endl;
-                        // //std::cout << mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") << std::endl;   
-                        // //std::cout << "'" << mapinfo[sock].request.url << "'" << std::endl;    
-                        if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_index().length() > 1)
-                        {
-                        //  mapinfo[sock].request.response.root = mapinfo[sock].get_root() + mapinfo[sock].request.url;
-                            if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") != true)
-                            {
-                                // std::cout << "orghin tli adada\n";
-                                mapinfo[sock].request.response.status = 501;
-                                if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
-                                {
-                                    mapinfo[sock].request.response.errorpage = 1;
-                                    mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
-                                }
-                                else
-                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
-                                // mapinfo[sock].request.response.url = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/notImplemented.html";
-                                return;
-                            }
-                            //std::cout << "hna "<< mapinfo[sock].get_location(mapinfo[sock].request.url).get_index() << std::endl;
-                            // mapinfo[sock].request.response.new_redur = mapinfo[sock].get_location(mapinfo[sock].request.url).get_index(); //!!!!
-                            mapinfo[sock].request.response.url = mapinfo[sock].root;    //!!!!!
-                            mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location_first(mapinfo[sock].request.url);
-                            mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location(mapinfo[sock].request.url).get_index();
-                            
-                            // mapinfo[sock].request.response.redur = true;  //!!!!!!
-                            // mapinfo[sock].get_location(mapinfo[sock].request.url)
-                            
-                            // std::cout << "root : " << mapinfo[sock].root << std::endl;
-                            // std::cout << "location : " << mapinfo[sock].get_location_first(mapinfo[sock].request.url) << std::endl;
-                            // std::cout << "index To serve : " << mapinfo[sock].request.response.url << std::endl;
-                            j = 1;
-                            return;
-                        }
-                        // //////std::cout << "directory_listing :" << mapinfo[sock].get_location(mapinfo[sock].request.response.url).get_directory_listing() << std::endl;
-                        if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_directory_listing().compare("true") == 0)
-                        {
-                            if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") != true)
-                            {
-                                // std::cout << "orghin tli adada\n";
-                                mapinfo[sock].request.response.status = 501;
-                                if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
-                                {
-                                    mapinfo[sock].request.response.errorpage = 1;
-                                    mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
-                                }
-                                else
-                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
-                                // mapinfo[sock].request.response.url = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/notImplemented.html";
-                                return;
-                            }
-                            // std::cout << "DONE directory_listing" << std::endl;  
-                            mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.response.url;
-                            mapinfo[sock].request.response.directory_listing = true;
-                            return;
-                        }
-                        else
-                        {
-                            if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") != true)
-                            {
-                                // std::cout << "orghin tli adada\n";
-                                mapinfo[sock].request.response.status = 501;
-                                if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
-                                {
-                                    mapinfo[sock].request.response.errorpage = 1;
-                                    mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
-                                }
-                                else
-                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
-                                // mapinfo[sock].request.response.url = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/notImplemented.html";
-                                return;
-                            }
-                            if (mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)// cheak url isgisila root
-                                mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.response.url;     //!!!!!
-                            // mapinfo[sock].request.response.redur = true;
-                            mapinfo[sock].request.response.new_redur = mapinfo[sock].request.response.url + "index.html";
-                            
-                            return;
-                        }
+                            mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
                         return;
                     }
-                    else
-                    {
-                        if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") != true)
-                        {
-                                // std::cout << "orghin tli adada\n";
-                                mapinfo[sock].request.response.status = 501;
-                                if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
-                                {
-                                    mapinfo[sock].request.response.errorpage = 1;
-                                    mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
-                                }
-                                else
-                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
-                                // mapinfo[sock].request.response.url = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/notImplemented.html";
-                                return;
-                        }
-                        if (mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)// cheak url isgisila root      //!!!!!
-                            mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.response.url;
-                        // mapinfo[sock].request.response.url = mapinfo[sock].get_root() + mapinfo[sock].request.response.url;
-                        //////std::cout << "FILE : " << mapinfo[sock].request.response.url << std::endl;
-                        //////std::cout << "File Done" << std::endl;
-                        return;    
                     }
-                }
-                else
-                {
-                    std::cout << "tmp1 : " << tmp1 << std::endl;
-                    mapinfo[sock].request.response.status = 404;
-                    if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
-                    {
-                        mapinfo[sock].request.response.errorpage = 1;
-                        mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "NOT-FOUND");
-                    }
-                    else
-                        mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
-                    return;
-                }
+                    std::cout << "ghid adlkm";
     // exit(1);
 }
 
@@ -841,74 +849,84 @@ void Server::run()
                 // long nb = string_to_long(mapinfo[i].request.host);
                 // checkResponse(i, mapinfo[i].request.host, mapinfo[i].request.port);
                 //std::cout << "----------------------------------------------------->" << mapinfo[i].root << std::endl;
-                checkResponse1(i, mapinfo[i].request.host);
-                // exit(1);
-                mapinfo[i].request.response.run();
-                // std::cout << mapinfo[i].request.response.SendResponse << std::endl;
-                // ////////std::cout << "************************************\n";
-                // ////////std::cout << "i == " << i << std::endl;
-                // ////////std::cout << "hna fach taykhrj " << std::endl;
-                // //////std::cout << "--> mapinfo[i].request.response.SendResponse.c_str() + mapinfo[i].request.se :" << mapinfo[i].request.response.SendResponse.c_str() + mapinfo[i].request.se << std::endl;
-                // //////std::cout << "--> mapinfo[i].request.response.SendResponse.size() - mapinfo[i].request.se :" << mapinfo[i].request.response.SendResponse.size() - mapinfo[i].request.se << std::endl;
-
-                
-                mapinfo[i].request.s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + mapinfo[i].request.se, mapinfo[i].request.response.SendResponse.size() - mapinfo[i].request.se, 0);
-                // if (mapinfo[i].request.s == -1) 
+                // if(mapinfo[i].request.methode != "DELETE")
                 // {
-                //     perror("send failed");
-                //     exit(1);
-                // }
-                mapinfo[i].request.se += mapinfo[i].request.s;
-                // //////std::cout << "size == " << mapinfo[i].request.response.SendResponse.size() << std::endl;
-                // //////std::cout << "s == " << mapinfo[i].request.s << std::endl;
-                // //////std::cout << "se == " << mapinfo[i].request.se << std::endl;
-                // std::string newsend = mapinfo[i].request.response.SendResponse.c_str() + s;
-                // if ()
-                if (mapinfo[i].request.se == mapinfo[i].request.response.SendResponse.size())
-                {
-                    // s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + s, mapinfo[i].request.response.SendResponse.size(), 0);
-                    FD_CLR(i,&write_fds);
-                    mapinfo[i].request.s = 0;
-                    mapinfo[i].request.se = 0;
-                    if (stat("./output.txt", &sb) == 0 && stat("./input.txt", &sb) == 0)
-                    {
-                        std::remove("./output.txt");
-                        std::remove("./input.txt");
-                    }
-                    mapinfo[i].request.response.SendResponse = "";
-                    mapinfo[i].request.header = "";
-                    mapinfo[i].request.body = "";
-                    // FD_CLR(i, &read_fds);
-                    close(i);
+                    
+                    checkResponse1(i, mapinfo[i].request.host);
+                    // exit(1);
+                    mapinfo[i].request.response.run();
+                    // std::cout << mapinfo[i].request.response.SendResponse << std::endl;
+                    // ////////std::cout << "************************************\n";
+                    // ////////std::cout << "i == " << i << std::endl;
+                    // ////////std::cout << "hna fach taykhrj " << std::endl;
+                    // //////std::cout << "--> mapinfo[i].request.response.SendResponse.c_str() + mapinfo[i].request.se :" << mapinfo[i].request.response.SendResponse.c_str() + mapinfo[i].request.se << std::endl;
+                    // //////std::cout << "--> mapinfo[i].request.response.SendResponse.size() - mapinfo[i].request.se :" << mapinfo[i].request.response.SendResponse.size() - mapinfo[i].request.se << std::endl;
 
-                    // mapinfo[i] = infoserv();
-                    // std::cout << "\033[0;35m" << "---------->>>>>CLOSE-SOCKET<<<<<-------- : " << i << "\033[0m" << std::endl;
-                    // mapinfo[i].request.s = 0;
-                    // mapinfo[i].request.se = 0;
-                }
-                if (mapinfo[i].request.s == -1)
-                {
-                    // s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + s, mapinfo[i].request.response.SendResponse.size(), 0);
-                    FD_CLR(i,&write_fds);
-                    mapinfo[i].request.s = 0;
-                    mapinfo[i].request.se = 0;
-                    mapinfo[i].request.response.SendResponse = "";
-                    mapinfo[i].request.header = "";
-                    mapinfo[i].request.body = "";
-                    // FD_CLR(i, &read_fds);
-                    close(i);
-                    if (stat("./output.txt", &sb) == 0 && stat("./input.txt", &sb) == 0)
+                    
+                    mapinfo[i].request.s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + mapinfo[i].request.se, mapinfo[i].request.response.SendResponse.size() - mapinfo[i].request.se, 0);
+                    // if (mapinfo[i].request.s == -1) 
+                    // {
+                    //     perror("send failed");
+                    //     exit(1);
+                    // }
+                    mapinfo[i].request.se += mapinfo[i].request.s;
+                    // //////std::cout << "size == " << mapinfo[i].request.response.SendResponse.size() << std::endl;
+                    // //////std::cout << "s == " << mapinfo[i].request.s << std::endl;
+                    // //////std::cout << "se == " << mapinfo[i].request.se << std::endl;
+                    // std::string newsend = mapinfo[i].request.response.SendResponse.c_str() + s;
+                    // if ()
+                    if (mapinfo[i].request.se == mapinfo[i].request.response.SendResponse.size())
                     {
-                        std::remove("./output.txt");
-                        std::remove("./input.txt");
+                        // s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + s, mapinfo[i].request.response.SendResponse.size(), 0);
+                        FD_CLR(i,&write_fds);
+                        mapinfo[i].request.s = 0;
+                        mapinfo[i].request.se = 0;
+                        if (stat("./output.txt", &sb) == 0 && stat("./input.txt", &sb) == 0)
+                        {
+                            std::remove("./output.txt");
+                            std::remove("./input.txt");
+                        }
+                        mapinfo[i].request.response.SendResponse = "";
+                        mapinfo[i].request.header = "";
+                        mapinfo[i].request.body = "";
+                        // FD_CLR(i, &read_fds);
+                        close(i);
+
+                        // mapinfo[i] = infoserv();
+                        // std::cout << "\033[0;35m" << "---------->>>>>CLOSE-SOCKET<<<<<-------- : " << i << "\033[0m" << std::endl;
+                        // mapinfo[i].request.s = 0;
+                        // mapinfo[i].request.se = 0;
                     }
-                    // mapinfo[i].request = Request();
-                    // mapinfo[i] = infoserv();
-                    // std::cout << "\033[0;35m" << "---------->>>>>CLOSE-SOCKET<<<<<-------- : " << i << "\033[0m" << std::endl;
-                    // s = 0;
-                    // mapinfo[i].request.se = 0;
-                    // mapinfo[i].request.s = 0;
-                }
+                    if (mapinfo[i].request.s == -1)
+                    {
+                        // s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + s, mapinfo[i].request.response.SendResponse.size(), 0);
+                        FD_CLR(i,&write_fds);
+                        mapinfo[i].request.s = 0;
+                        mapinfo[i].request.se = 0;
+                        mapinfo[i].request.response.SendResponse = "";
+                        mapinfo[i].request.header = "";
+                        mapinfo[i].request.body = "";
+                        // FD_CLR(i, &read_fds);
+                        close(i);
+                        if (stat("./output.txt", &sb) == 0 && stat("./input.txt", &sb) == 0)
+                        {
+                            std::remove("./output.txt");
+                            std::remove("./input.txt");
+                        }
+                        // mapinfo[i].request = Request();
+                        // mapinfo[i] = infoserv();
+                        // std::cout << "\033[0;35m" << "---------->>>>>CLOSE-SOCKET<<<<<-------- : " << i << "\033[0m" << std::endl;
+                        // s = 0;
+                        // mapinfo[i].request.se = 0;
+                        // mapinfo[i].request.s = 0;
+                    }
+                // }
+                // else
+                // {
+                //     send(i, mapinfo[i].request.response.SendResponse.c_str(), mapinfo[i].request.response.SendResponse.size() , 0);
+                //     std::cout << "\033[0;35m" << "---------->>>>>CLOSE-SOCKET<<<<<-------- : " << i << "\033[0m" << std::endl;
+                //     close(i);
+                // }
             }
             
         }

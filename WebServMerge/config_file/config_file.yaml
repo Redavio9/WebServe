@@ -15,6 +15,7 @@ server:
 		413: ErrorPages/413.html
 
 location: /
+	upload_dir: /upload
 	index: index_.html
 	methods: GET POST
 location: /server1/

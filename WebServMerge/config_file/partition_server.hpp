@@ -17,7 +17,7 @@ class partition_server{
         std::string max_body_size;
         std::string index;
     public:
-        std::vector<std::string> server_name;  //!!!!!
+        std::vector<std::string> server_name;
         std::map<std::string, location_param> location;
         std::map<std::string, std::string> error_pages;
         partition_server();

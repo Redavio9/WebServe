@@ -6,11 +6,12 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:27 by rarraji           #+#    #+#             */
-/*   Updated: 2024/06/03 15:47:48 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/06/03 19:59:27 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "request.hpp"
+#include "./config_file/utils.hpp"
 
 Request::Request()
 {
@@ -166,12 +167,11 @@ void Request::AddHeaderBody()
 }
 void Request::CreatFiles(std::string NameFile, std::string buf, bool check)
 {
-  // try 
-  // {
     if (check)
     {
-      char s[100]; 
-      chdir("/Users/rarraji/Desktop/prj/WebServMerge/pages/web3/upload");
+      char s[100];
+      std::string tmp = root + get_location(url).get_upload_dir().c_str();
+      chdir(tmp.c_str());
       printf("%s\n", getcwd(s, 100));
       std::ofstream outputFile(NameFile , std::ios::binary);
       if (!outputFile.is_open()) 
@@ -183,9 +183,10 @@ void Request::CreatFiles(std::string NameFile, std::string buf, bool check)
     }
     else
     {
-      char s[100]; 
-      chdir("/Users/rarraji/Desktop/prj/WebServMerge/pages/web3/upload");
-      printf("%s\n", getcwd(s, 100)); 
+      char s[100];
+      std::string tmp = root + get_location(url).get_upload_dir().c_str();
+      chdir(tmp.c_str());
+      printf("%s\n", getcwd(s, 100));
       std::ofstream outputFile(NameFile);
       if (!outputFile.is_open()) 
       {
@@ -377,6 +378,48 @@ int Request::check_req_valid()
   return(1);
 }
 
+void Request::set_location(std::string index, location_param value)
+{
+    if(location.find(index) != location.end())
+        utils::print_error("duplicate location : ", index);
+    location[index] = value;
+}
+
+location_param Request::get_location(std::string key)
+{
+    std::map<std::string, location_param>::iterator it = location.find(key);
+     if (it == location.end())
+     {
+        std::string path;
+        std::string save;
+        int i = 0;
+        for(it = location.begin(); it != location.end(); it++)
+        {
+            if(!key.find(it->first))
+            {
+                if(i == 0)
+                    save = it->first;
+                else
+                {
+                    if(save.size() <= it->first.size())
+                        save = it->first;
+                }
+            }
+            i++;
+        }
+        it = location.find(save);
+        if (save.empty())
+        {
+            location_param loc;
+            loc.set_methods("GET");
+            set_location("/", loc);
+            return loc;
+        }
+        return it->second;
+     }
+    return it->second;
+}
+
 
 void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
 {
@@ -448,73 +491,94 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
     
       if(check_req_valid() && tmp == 0)
       {
-        
-        // std::cout << "\033[0;35m" << "---------->>>>>ALL-REQUSTE<<<<<--------" << "\033[0m" << std::endl;
-        // std::cout << "Get : "<< Get << std::endl;
-        if(!Get)
-          body = request.substr(header_len, request.length());
-        // exit(1);
-        AddHeaderBody();
-      // std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
-      // std::cout << "\033[0;33m" << body << "\033[0m" << std::endl;
-      // std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
-        ////std::cout << "\033[0;35m" << "---------->>>>>BODY<<<<--------" << "\033[0m" << std::endl;
-        ////std::cout << new_body  << std::endl;
-        ////std::cout << "\033[0;35m" << "---------->>>>>><<<<<<--------" << "\033[0m" << std::endl;
-        if ((pos = header.find("\r\n\r\n")) != std::string::npos)
-          header = header.substr(0, pos + 2);
-        ////std::cout << "\033[0;35m" << "---------->>>>>Header<<<<--------" << "\033[0m" << std::endl;
-        ////std::cout << header  << std::endl;
-        ////std::cout << "\033[0;35m" << "---------->>>>>><<<<<<--------" << "\033[0m" << std::endl;
-        // exit(1);
-        // if (!cgi)
-        UploadFiles();
-        // ////////std::cout << "herre\n";
-        response.SetHeader(header);
-        response.SetBody(body);
-        // std::cout << "url_req ----------------------------------> " << url << std::endl;
-        response.SetUrl(url);
-        response.check_body = false; 
-        // if (response.url.find(".py") != std::string::npos)
-        // {
-        //   struct stat sb;
-        //   if (stat("./output.txt", &sb) != 0)
-        //   {
-        //     response.status = 404;
-        //     response.url = "/ErrorPages/notFound.html";
-        //   }
-        //   else
-        //   {
-        //     ////////std::cout << "hnaaaaaaaaa\n";
-        //     response.check_cgi = true;
-        //     Cgi cgi;
-        //     cgi.SetHeader(header);
-        //     cgi.SetBody(new_body);
-        //     cgi.url = root + response.url;
-        //     cgi.querystingcgi = querystingcgi;
-        //     cgi.methode = methode;
-        //     cgi.run();
-        //     // cgi.methode = "GET";
-        //     // //////std::cout << "stat : " << stat("./output.txt", &sb) << std::endl;
-        //     if (cgi.time_out == 1)
-        //     {
-        //       std::cout << "hna\n";
-        //       response.check_cgi = false;
-        //       response.status = 504;
-                  // if(get_error_pages(convertIntToString1(504)).empty())
-                  // {
-                  //     response.errorpage = 1;
-                  //     response.url = generateErrorPage3(504, "getwayTimeout");
-                  // }
-                  // else
-                  // response.url = get_error_pages(convertIntToString1(413));
-        //       response.url = "/ErrorPages/getwayTimeout.html";
-        //     }
-        //     response.url = "/Users/rarraji/Desktop/prj/WebServMerge/pages/output.txt";
-        //   }
-        // }
-        // else
-        //   response.run();
+        if(methode == "DELETE")
+        {
+          std::string del = root + url;
+          if(utils::deletePath(del.c_str())==-1)
+            utils::removeDirectoryRecursively(del.c_str());
+          response.status = 200;
+          response.methode = "DELETE";
+          response.url = generateErrorPage3(200, "DELETE_DONE");;
+        }
+        else
+        {
+          
+          // std::cout << "\033[0;35m" << "---------->>>>>ALL-REQUSTE<<<<<--------" << "\033[0m" << std::endl;
+          // std::cout << "Get : "<< Get << std::endl;
+          if(!Get)
+            body = request.substr(header_len, request.length());
+          // exit(1);
+          AddHeaderBody();
+        // std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
+        // std::cout << "\033[0;33m" << body << "\033[0m" << std::endl;
+        // std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
+          ////std::cout << "\033[0;35m" << "---------->>>>>BODY<<<<--------" << "\033[0m" << std::endl;
+          ////std::cout << new_body  << std::endl;
+          ////std::cout << "\033[0;35m" << "---------->>>>>><<<<<<--------" << "\033[0m" << std::endl;
+          if ((pos = header.find("\r\n\r\n")) != std::string::npos)
+            header = header.substr(0, pos + 2);
+          ////std::cout << "\033[0;35m" << "---------->>>>>Header<<<<--------" << "\033[0m" << std::endl;
+          ////std::cout << header  << std::endl;
+          ////std::cout << "\033[0;35m" << "---------->>>>>><<<<<<--------" << "\033[0m" << std::endl;
+          // exit(1);
+          std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
+          std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
+          std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
+          if (get_location(url).get_upload_dir().length() > 0)
+          {
+            std::cout << "ghid ahila\n";
+            cgi = true;
+            UploadFiles();
+          }
+          // ////////std::cout << "herre\n";
+          response.SetHeader(header);
+          response.SetBody(body);
+          // std::cout << "url_req ----------------------------------> " << url << std::endl;
+          response.SetUrl(url);
+          response.check_body = false; 
+          if (response.url.find(".py") != std::string::npos && cgi == false)
+          {
+            std::cout << "ghid ahila cgi\n";
+            // struct stat sb;
+            // if (stat("./output.txt", &sb) != 0)
+            // {
+            //   response.status = 404;
+            //   response.url = "/ErrorPages/notFound.html";
+            // }
+            // else
+            // {
+              ////////std::cout << "hnaaaaaaaaa\n";
+              response.check_cgi = true;
+              Cgi cgi;
+              cgi.SetHeader(header);
+              cgi.SetBody(new_body);
+              cgi.url = root + response.url;
+              cgi.root = root;
+              cgi.querystingcgi = querystingcgi;
+              cgi.methode = methode;
+              cgi.run();
+              // cgi.methode = "GET";
+              // //////std::cout << "stat : " << stat("./output.txt", &sb) << std::endl;
+              if (cgi.time_out == 1)
+              {
+                std::cout << "hna\n";
+                response.check_cgi = false;
+                response.status = 504;
+                    if(get_error_pages(convertIntToString1(504)).empty())
+                    {
+                        response.errorpage = 1;
+                        response.url = generateErrorPage3(504, "getwayTimeout");
+                    }
+                    else
+                    response.url = get_error_pages(convertIntToString1(413));
+                response.url = "/ErrorPages/getwayTimeout.html";
+              }
+              response.url = root + "/output.txt";
+            // }
+          }
+          // else
+          //   response.run();
+        }
       }
       request = "";
       FD_CLR(socket, &read_fds);

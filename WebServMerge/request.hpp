@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 09:55:24 by rarraji           #+#    #+#             */
-/*   Updated: 2024/06/03 13:17:14 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/06/03 18:25:46 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class Request{
     int header_len;
     int start;
     int check_l3mara;
+    int upload_nor;
     
     // bool cgi;
   public:
@@ -92,7 +93,9 @@ class Request{
     void SaveHost_Port(std::string tmp_host);
     void CreatFiles(std::string NameFile, std::string buf, bool check);
     std::string generateErrorPage(int statusCode, const std::string& errorMessage);
+    location_param get_location(std::string key);
     std::string get_error_pages(std::string key);
+    void set_location(std::string index, location_param value);
     Response response;
 };
 

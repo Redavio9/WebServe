@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 10:17:38 by rarraji           #+#    #+#             */
-/*   Updated: 2024/06/03 15:36:33 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/06/03 19:53:44 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -374,8 +374,8 @@ void Response::run()
                     //         // ////////std::cout << "HERE1\n";
                     //     }
                     }
-                    else if(methode == "POST")
-                        url = "/Users/rarraji/Desktop/prj/WebServMerge/output.txt";
+                    // else if(methode == "POST")
+                    //     url = "/Users/rarraji/Desktop/prj/WebServMerge/output.txt";
                     if(methode == "POST")
                        status = 201;
                     else if(status == 0)                        
@@ -393,13 +393,14 @@ void Response::run()
                     // else
                     new_url = url;
                     std::cout << "new_url -- > " << new_url << std::endl;
-                    if(errorpage == 1)
+                    std::cout << "errorpage -- > " << errorpage << std::endl;
+                    if(errorpage == 1 || methode == "DELETE")
                     {
-                        // std::cout << "redas\n";
+                        std::cout << "redas\n";
                         // SendResponse += "Content-Type: text/html\r\n";
                         // SendResponse += "\r\n";
                         // SendResponse += new_url;
-                        SendResponse += response_generate_error_page(SendResponse, new_url);
+                        SendResponse = response_generate_error_page(SendResponse, new_url);
                         // std::cout << "---------------------------------"  << std::endl;
                         // std::cout << "SendResponse : " << SendResponse << std::endl;
                         // std::cout << "---------------------------------"  << std::endl;

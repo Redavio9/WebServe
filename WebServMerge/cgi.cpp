@@ -104,6 +104,7 @@ void Cgi::run()
     
 
     // Open a temporary file to store the output
+    chdir(root.c_str());
     int outputFile = open("output.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     std::ofstream ss("./input.txt");
     if(ss.is_open())
