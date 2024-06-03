@@ -6,7 +6,7 @@
 #    By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/02/22 10:15:25 by rarraji           #+#    #+#              #
-#    Updated: 2024/05/10 11:03:53 by rarraji          ###   ########.fr        #
+#    Updated: 2024/06/02 22:11:36 by rarraji          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME    = Server
 CC      = c++
 FLAGS   = -Wall -Wextra -Werror -std=c++98 #-fsanitize=address -g
 RM      = rm -rf
-SRC     = main.cpp Server.cpp request.cpp cgi.cpp response.cpp infoserv.cpp location.cpp ParseServer.cpp ./config_file/config_file.cpp ./config_file/partition_server.cpp ./config_file/location_param.cpp
+SRC     = main.cpp Server.cpp request.cpp cgi.cpp response.cpp infoserv.cpp location.cpp ParseServer.cpp ./config_file/config_file.cpp ./config_file/partition_server.cpp ./config_file/location_param.cpp ./config_file/utils.cpp
 OBJ     = $(SRC:.cpp=.o) 
 
 # Colors
@@ -51,6 +51,9 @@ fclean: clean
 	@$(RM) $(NAME)
 	@printf "$(RED)    - Executable removed.\n"
 
-re: all clean
+re: fclean all
 
 .PHONY: all clean fclean re
+
+run :
+	./Server config_file/config_file.yaml

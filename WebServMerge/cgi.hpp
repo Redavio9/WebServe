@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 15:35:09 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/03 09:26:57 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/06/02 11:17:57 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <thread>
+#include <sys/stat.h>
 
 class Cgi
 {
@@ -42,6 +43,11 @@ class Cgi
   public:
     Cgi();
     ~Cgi();
+    std::string url;
+    std::string root;
+    std::string querystingcgi;
+    std::string methode;
+    int time_out;
     // Request request;
     void SetHeader(std::string header);
     void SetBody(std::string body);

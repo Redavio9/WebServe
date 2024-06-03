@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 10:17:36 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/17 17:42:43 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/06/03 15:33:53 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,14 @@
 class Response
 {
   public:
+    
     bool check_body;
+    std::map<std::string, std::string> error_pages;
     bool check_cgi;
     bool redur;
     int socket;
+    int status;
+    int errorpage;
     std::string body;
     std::string root;
     std::string header;
@@ -51,6 +55,7 @@ class Response
     std::string url;
     std::string SendResponse;
     std::string new_redur;
+    std::string reqerror;
     bool directory_listing;
     std::map <std::string , std::string> ContentType;
     Response();
@@ -66,5 +71,6 @@ class Response
     std::string AddContentType();
     void RemplirContentType();
     void checkResponse(int socket_fd, std::string host, std::string port);
+    std::string get_error_pages(std::string key);
 
 };

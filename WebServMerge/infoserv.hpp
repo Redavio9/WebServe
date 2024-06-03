@@ -6,7 +6,7 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 10:16:42 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/12 14:57:47 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/06/03 12:47:28 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include "map"
 #include "request.hpp"
 #include "location.hpp"
+#include "./config_file/location_param.hpp"
+#include "./config_file/partition_server.hpp"
 
 class Request;
 // class Response;
@@ -22,14 +24,21 @@ class Request;
 class infoserv
 {
   public:
+    std::vector<partition_server> servers;
     std::string body;
-    std::map<int, std::string> ErrorPage;
-    std::string host;
+    int host;
     std::string index;
     std::string root;
-    int port;
+    std::vector<std::string> server_name;
+    std::map<std::string, std::string> error_pages;
+    std::map<std::string, location_param> location;
+    std::string port;
     std::string MaxBodySize;
-    location location;
     Request request;
     void SetContentType();
+    location_param get_location(std::string key);
+    void set_location(std::string index, location_param value);
+    std::string get_location_first(std::string index);
+    std::string get_error_pages(std::string key);
+    
 };

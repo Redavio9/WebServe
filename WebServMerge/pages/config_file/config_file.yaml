@@ -1,0 +1,11 @@
+server:
+	host: localhost
+	port: 2004
+	root: /Users/rarraji/Desktop/prj/WebServMerge/pages/web3
+	max_body_size: 10000000
+	index: index.html
+	server_name: hello.com
+
+location: /
+	index: index_.html
+	methods: GET | POST

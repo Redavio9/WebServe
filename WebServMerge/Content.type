@@ -1,4 +1,3 @@
-py                          text/x-python                         
 html                        text/html                             
 htm                         text/html                             
 shtml                       text/html                             
@@ -97,4 +96,6 @@ mng                         video/x-mng
 asx                         video/x-ms-asf                        
 asf                         video/x-ms-asf                        
 wmv                         video/x-ms-wmv                        
-avi                         video/x-msvideo                       
+avi                         video/x-msvideo             
+ttf                         font/ttf
+otf                         font/otf          

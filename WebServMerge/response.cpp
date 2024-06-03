@@ -6,17 +6,19 @@
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/30 10:17:38 by rarraji           #+#    #+#             */
-/*   Updated: 2024/05/19 12:19:00 by rarraji          ###   ########.fr       */
+/*   Updated: 2024/06/03 15:36:33 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "response.hpp"
 #include<dirent.h>
 
+
 #define PATH "/Users/rarraji/Desktop/prj/WebServMerge/pages"
 
 Response::Response()
 {
+    status = 0;
 //   check_cgi = false;
 }
 Response::~Response()
@@ -42,7 +44,7 @@ void Response::SetSocket(int tmp_SetSocket)
 
 std::string Response::GetHeader()
 {
-//   std::cout << "here\n";
+//   ////////std::cout << "here\n";
   return(this->header);
 }
 std::string Response::GetBody()
@@ -78,29 +80,81 @@ void Response::RemplirContentType()
         i++;    
     }
     for (std::map<std::string, std::string>::iterator it = ContentType.begin(); it != ContentType.end(); ++it);
-        // std::cout << ContentType[it->first] << std::endl; 
+        // ////////std::cout << ContentType[it->first] << std::endl; 
 }
 
-std::string Response::generateHTML(const char* path) 
-{
-                // SendResponse = "HTTP/1.1 200 OK\r\n";
-    std::ostringstream ss;
-    DIR *dir = opendir(path);
-    if (!dir) {
-        return "";
-    }
+// std::string Response::generateHTML(const char* path) 
+// {
+//                 // SendResponse = "HTTP/1.1 200 OK\r\n";
+//     std::cout << "redas\n";
+//     std::ostringstream ss;
+//     DIR *dir = opendir(path);
+//     if (!dir) {
+//         return "";
+//     }
 
-    ss << "<html><head><title>Directory Listing</title><style>h1 {text-align:center;}</style></head><body><h1>Directory Listing</h1><ul><br>";
+//     ss << "<html><head><title>Directory Listing</title><style>h1 {text-align:center;}</style></head><body><h1>Directory Listing</h1><ul><br>";
 
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] != '.') {
-            ss << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>";
-        }
+//     struct dirent *entry;
+//     while ((entry = readdir(dir)) != NULL) {
+//         if (entry->d_name[0] != '.') {
+//             ss << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>";
+//         }
+//     }
+//     ss << "</ul></body></html>"; 
+//     closedir(dir);
+//     return ss.str();
+// }
+
+
+std::string Response::generateHTML(const char* path) {
+  DIR *dir = opendir(path);
+  if (!dir) {
+    return "";
+  }
+
+  std::ostringstream ss;
+  ss << "<html><head><title>Directory Listing</title>"
+     "<style>"
+     "body {"
+     "  font-family: 'Arial', sans-serif;  /* Set font family */"
+     "  background-color: #f5f5f5;  /* Set background color */"
+     "  margin: 30px;  /* Adjust margins */"
+     "  padding: 20px;  /* Add padding */"
+     "}"
+     "h1 {"
+     "  text-align: center;  /* Center header */"
+     "  color: #333;  /* Set header color */"
+     "  font-size: 24px;  /* Adjust font size */"
+     "  margin-bottom: 20px;  /* Add space below header */"
+     "}"
+     "ul {"
+     "  list-style: none;  /* Remove default bullets */"
+     "  padding: 0;  /* Reset padding */"
+     "}"
+     "li {"
+     "  margin-bottom: 15px;  /* Space between list items */"
+     "}"
+     "a {"
+     "  text-decoration: none;  /* Remove underline */"
+     "  color: #007bff;  /* Link color */"
+     "  font-weight: bold;  /* Make links bolder */"
+     "}"
+     "a:hover {"
+     "  color: #0056b3;  /* Change link color on hover */"
+     "}"
+     "</style>"
+     "</head><body><h1>Directory Listing</h1><ul><br>";
+
+  struct dirent *entry;
+  while ((entry = readdir(dir)) != NULL) {
+    if (entry->d_name[0] != '.') {
+      ss << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>";
     }
-    ss << "</ul></body></html>"; 
-    closedir(dir);
-    return ss.str();
+  }
+  ss << "</ul></body></html>";
+  closedir(dir);
+  return ss.str();
 }
 
 
@@ -122,13 +176,19 @@ std::string Response::AddContentType()
             }
         }
     }
-    if(part.compare("Content-Type: ") == 0)
+    if(part.compare("Content-Type: ") == 0 && directory_listing == 0)
     {
-        part += "text/html";
+        part += "text/plain";
         part += "\r\n";   
     }
+    else
+    {
+        part += "text/html";
+        part += "\r\n";
+    }
+    
         
-    // std::cout << "HNA : ---> "<< part << std::endl;
+    // ////////std::cout << "HNA : ---> "<< part << std::endl;
     // exit(1);
     return(part);   
     // for (size_t i = 0; i < ; i++)
@@ -146,16 +206,16 @@ std::string Response::AddContentType()
 // void Response::checkResponse(int socket, std::string host , std::string port)
 // {
 //     (void) socket;
-//     std::cout << "host: " << host  << std::endl;
-//     std::cout << "port: " << port  << std::endl;
+//     ////////std::cout << "host: " << host  << std::endl;
+//     ////////std::cout << "port: " << port  << std::endl;
 //     for (size_t i = 0; i < this->servers.size(); i++)
 //     {
 //         if(this->servers[i].get_host().compare(host) == 0 && this->servers[i].get_port().compare(port) == 0)
 //         {
-//             std::cout << "url : " << mapinfo[socket].request.url << std::endl;
-//             std::cout << "root + url : " <<  this->servers[i].get_root() + mapinfo[socket].request.url << std::endl;
+//             ////////std::cout << "url : " << mapinfo[socket].request.url << std::endl;
+//             ////////std::cout << "root + url : " <<  this->servers[i].get_root() + mapinfo[socket].request.url << std::endl;
 //             if(this->servers[i].get_location_first(mapinfo[socket].request.url).compare(mapinfo[socket].request.url) == 0)        
-//                 std::cout << "DONE" << std::endl;
+//                 ////////std::cout << "DONE" << std::endl;
 //             //check url is valide in location;
 //         }
 //         struct stat fileStat;
@@ -166,7 +226,7 @@ std::string Response::AddContentType()
 //                 // this->servers[i].get_location(mapinfo[socket].request.url).get_redirect_url();
 //                 if (this->servers[i].get_location(mapinfo[socket].request.url).get_redirect_url().length() > 1)
 //                 {
-//                     std::cout << "redirect_URL : " << this->servers[i].get_location(mapinfo[socket].request.url).get_redirect_url() << std::endl;
+//                     ////////std::cout << "redirect_URL : " << this->servers[i].get_location(mapinfo[socket].request.url).get_redirect_url() << std::endl;
 //                     mapinfo[socket].request.response.redur = true;
 //                     mapinfo[socket].request.response.new_redur = this->servers[i].get_location(mapinfo[socket].request.url).get_redirect_url();
 //                     //check_redirect_URL
@@ -185,27 +245,54 @@ std::string Response::AddContentType()
 
 
                 
-//                 std::cout << "methods : " << this->servers[i].get_location(mapinfo[socket].request.url).get_methods() << std::endl;
-//                 std::cout << "index : " << this->servers[i].get_location(mapinfo[socket].request.url).get_index() << std::endl;
+//                 ////////std::cout << "methods : " << this->servers[i].get_location(mapinfo[socket].request.url).get_methods() << std::endl;
+//                 ////////std::cout << "index : " << this->servers[i].get_location(mapinfo[socket].request.url).get_index() << std::endl;
 //                 // check is directory_listing && alias
 //                 // check methode allowed
 //                 // check index 
 //                 // check auto indexing
                  
-//                 // std::cout << "DONE DIR" << std::endl;
+//                 // ////////std::cout << "DONE DIR" << std::endl;
 //             }
 //             else
-//                 std::cout << "File" << std::endl;
+//                 ////////std::cout << "File" << std::endl;
 //         }
 //     }
 //     // exit(1);
 // }
 
+std::string Response::get_error_pages(std::string key)
+{
+    std::map<std::string, std::string>::iterator it = error_pages.find(key);
+    if (it == error_pages.end())
+        return "";
+    return it->second;
+}
 
+std::string generateErrorPage1(int statusCode, const std::string& errorMessage) 
+{
+  std::ostringstream ss;
+  ss << "<html><head><title>Error " << statusCode << "</title></head>"
+     "<body><h1>Error: " << statusCode << "</h1>"
+     "<p>" << errorMessage << "</p>"
+     "</body></html>";
+  return ss.str();
+}
 
+std::string convertIntToString(int number) 
+{
+    std::ostringstream ss;
+    ss << number;
+    return ss.str();
+}
 
-
-
+std::string response_generate_error_page(std::string resp, std::string new_url)
+{
+    resp += "Content-Type: text/html\r\n";
+    resp += "\r\n";
+    resp += new_url;
+    return(resp);
+}
 
 void Response::run()
 {
@@ -213,21 +300,21 @@ void Response::run()
 //   std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
 //   std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
 //   std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
-//   std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
-//   std::cout << "\033[0;33m" << body << "\033[0m" << std::endl;
-//   std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
+//   ////////std::cout << "\033[0;33m" << "********************************BODY*************************************" << "\033[0m" << std::endl;
+//   ////////std::cout << "\033[0;33m" << body << "\033[0m" << std::endl;
+//   ////////std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
   
                 // std::string test = "/";
                 // std::string test1 = "/favicon.ico";
                 // std::string path = "./pages";
                 // std::string new_path = "./pages";
-                // std::cout << "----> " << check_cgi << std::endl;
-                if(redur == true)
-                    std::cout << "---->" << new_redur << "<----"<< std::endl;
-                else
-                    std::cout << "---->" << url << "<----"<< std::endl;
-                std::cout << "redur : " << redur << std::endl;
-                int check = true;
+                // ////////std::cout << "----> " << check_cgi << std::endl;
+                // if(redur == true)
+                //     ////////std::cout << "---->" << new_redur << "<----"<< std::endl;
+                // else
+                    ////////std::cout << "---->" << url << "<----"<< std::endl;
+                ////////std::cout << "redur : " << redur << std::endl;
+                // int check = true;
                 // struct stat fileStat;
                 // stat(url.c_str(), &fileStat);
                 // if (S_ISDIR(fileStat.st_mode))
@@ -237,7 +324,7 @@ void Response::run()
                 if (redur == true)
                 {
 
-                    std::cout << "redur is gonna to serve" << std::endl;
+                    //////std::cout << "redur is gonna to serve" << std::endl;
                     SendResponse = "HTTP/1.1 301 Moved Permanently\r\n";
                     SendResponse += "Content-Type: text/html\r\n";
                     SendResponse += "Location: " + new_redur;
@@ -249,49 +336,53 @@ void Response::run()
                     {
                         if (url.compare("/favicon.ico") == 0)
                         {
-                            check = false;
+                            // check = false;
                             // url = PATH;
                             // url += "/images/me.png";
                         }
-                        // if (url.compare("/") == 0)
-                        // {
-                        //     check = false;
-                        //     url = PATH;
-                        //     url += "/index.html";
-                        // }
-                        // if (url.compare("/upload") == 0)
-                        //     url = "/upload";
-                        // if (url.compare("/images/rarraji.jpg") == 0)
-                        //     url = "./images/rarraji.jpg";
-                        // if (url.compare("/images/bel-kdio.jpg") == 0)
-                        //     url = "./images/bel-kdio.jpg";
-                        // if (url.compare("/images/maxresdefault.jpg") == 0)
-                        //     url = "./images/maxresdefault.jpg";
-                        // if (url.compare("/images/vedeo.mp4") == 0)
-                        //     url = "./images/vedeo.mp4"; 
+                    //     if (url.compare("/") == 0)
+                    //     {
+                    //         check = false;
+                    //         url = PATH;
+                    //         url += "/index.html";
+                    //     }
+                    //     if (url.compare("/upload") == 0)
+                    //         url = "/upload";
+                    //     if (url.compare("/images/rarraji.jpg") == 0)
+                    //         url = "./images/rarraji.jpg";
+                    //     if (url.compare("/images/bel-kdio.jpg") == 0)
+                    //         url = "./images/bel-kdio.jpg";
+                    //     if (url.compare("/images/maxresdefault.jpg") == 0)
+                    //         url = "./images/maxresdefault.jpg";
+                    //     if (url.compare("/images/vedeo.mp4") == 0)
+                    //         url = "./images/vedeo.mp4"; 
                             
-                        // if(url.compare("./ErrorPages") == 0)
-                        // {
-                        //     std::cout << "i am here\n";
-                        //     new_path = url;        
-                        // }
-                        // else if (url.compare("./images/rarraji.jpg") != 0 && url.compare("./images/bel-kdio.jpg") != 0 && url.compare("./images/maxresdefault.jpg") && url.compare("./images/vedeo.mp4") && url.compare("../fichier.txt") != 0)
-                        // {
-                        //     new_path += url + ".html";
-                        //     std::cout << new_path << std::endl;
-                        //     std::cout << "HERE2\n";
-                        // }   
-                        // else
-                        // {
-                        //     new_path = url;
-                        //     // std::cout << "HERE1\n";
-                        // }
+                    //     if(url.compare("./ErrorPages") == 0)
+                    //     {
+                    //         ////////std::cout << "i am here\n";
+                    //         new_path = url;        
+                    //     }
+                    //     else if (url.compare("./images/rarraji.jpg") != 0 && url.compare("./images/bel-kdio.jpg") != 0 && url.compare("./images/maxresdefault.jpg") && url.compare("./images/vedeo.mp4") && url.compare("../fichier.txt") != 0)
+                    //     {
+                    //         new_path += url + ".html";
+                    //         ////////std::cout << new_path << std::endl;
+                    //         ////////std::cout << "HERE2\n";
+                    //     }   
+                    //     else
+                    //     {
+                    //         new_path = url;
+                    //         // ////////std::cout << "HERE1\n";
+                    //     }
                     }
-                    else
-                        url = "./output.txt";
-                    // std::cout << "url : "<< url << std::endl;
+                    else if(methode == "POST")
+                        url = "/Users/rarraji/Desktop/prj/WebServMerge/output.txt";
+                    if(methode == "POST")
+                       status = 201;
+                    else if(status == 0)                        
+                        status = 200;
                     std::stringstream buffer;
-                    SendResponse = "HTTP/1.1 200 OK\r\n";
+                    std::string tmp_status = "HTTP/1.1 " + convertIntToString(status);
+                    SendResponse = tmp_status + " OK\r\n";
                     std::string new_url;
                     bool dir = false;
                     // if(url.find(url) == std::string::npos)
@@ -301,142 +392,196 @@ void Response::run()
                     // }
                     // else
                     new_url = url;
-                    if (new_url.find("GreatUpload.html") != std::string::npos )
-                       SendResponse = "HTTP/1.1 201 OK\r\n";  
-                    if (directory_listing == 1)
+                    std::cout << "new_url -- > " << new_url << std::endl;
+                    if(errorpage == 1)
                     {
-                        // std::string tmp;
-                        // tmp = root;
-                        // tmp += url;
-                        // // url = tmp; 
-                        std::cout << "-->new_path directory_listing : "<< url << std::endl;
-                        SendResponse += AddContentType();
-                        SendResponse += "\r\n";
-                        SendResponse += generateHTML(url.c_str());
-                        dir = true;
-                        // std::cout << "->new_url : "<< tmp << std::endl;
-                        // std::ifstream file(tmp.c_str());
-                        // if (!file.is_open()) 
-                        // {
-                        //     std::cerr << "[Server] Impossible d'ouvrir image " << "\n";
-                        // }
-                        // // std::cout << "here" << std::endl;
-                        // buffer << file.rdbuf();
-                        // file.close();
-                    }
-                    else if (url.find(".jpg") != std::string::npos || url.find(".png") != std::string::npos)
-                    {
-                        std::cout << "---->new_url : "<< new_url << std::endl;
-                        std::ifstream file(new_url.c_str(), std::ios::binary);
-                        if (!file.is_open()) 
-                        {
-                            std::cerr << "[Server] Impossible d'ouvrir image " << "\n";
-                        }
-                        // std::cout << "here" << std::endl;
-                        buffer << file.rdbuf();
-                        file.close();
-                        SendResponse += AddContentType();
-                        // SendResponse += "Content-Type: image/jpg\r\n";
-                    }
-                    else if (url.compare("/images/vedeo.mp4") == 0)
-                    {
-                        std::cout << "---->new_url : "<< new_url << std::endl;
-                        std::ifstream file(new_url.c_str(), std::ios::binary);
-                        if (!file.is_open()) 
-                        {
-                            std::cerr << "[Server] Impossible d'ouvrir le vedeo " << "\n";
-                        }
-                        buffer << file.rdbuf();
-                        file.close();
-                        // std::stringstream fi;
-                        std::ofstream fi("vedeo.mp4", std::ios::binary);
-                        if (!fi.is_open()) 
-                        {
-                            std::cerr << "[Server] Impossible d'ouvrir le vedeo " << "\n";
-                        }
-                        fi << buffer.rdbuf();
-                        SendResponse += AddContentType();
-                        // SendResponse += "Content-Type: video/mp4\r\n";
+                        // std::cout << "redas\n";
+                        // SendResponse += "Content-Type: text/html\r\n";
+                        // SendResponse += "\r\n";
+                        // SendResponse += new_url;
+                        SendResponse += response_generate_error_page(SendResponse, new_url);
+                        // std::cout << "---------------------------------"  << std::endl;
+                        // std::cout << "SendResponse : " << SendResponse << std::endl;
+                        // std::cout << "---------------------------------"  << std::endl;
                     }
                     else
                     {
-                        std::cout << "1---->new_url : "<< new_url << std::endl;
-                        if(check_cgi == true)
-                            new_url = url;
-                        if (access(new_url.c_str(), R_OK) != 0)
-                        {
-                                std::cout << "forbiden R_OFF" << std::endl;
-                                std::string tmp;
-                                tmp = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/forbidden.html";
-                                std::ifstream file(tmp);
-                                // check = 0;
-                                if (!file.is_open())
-                                {
-                                std::cerr << "[Server 404] Impossible d'ouvrir le fichier here" << "\n";
-                                }
-                                // std::cerr << "[Server 1] Impossible d'ouvrir le fichier here" << "\n";
-                                buffer << file.rdbuf();
-                                file.close();
-                        }   
-                        else
-                        {
-                            std::ifstream file(new_url.c_str());
-                            std::cout << "---->new_url : "<< new_url << std::endl;
-                            if (!file.is_open()) 
+                        
+                            // std::cout << "url response: "<< new_url << std::endl;
+                            //std::cout << "directory_listing : " << directory_listing << std::endl;
+                            if (new_url.find(".txt") != std::string::npos)
                             {
-                                file.close();
-                                std::string tmp;
-                                tmp = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/notFound.html";
-                                std::ifstream file(tmp);
-                                // check = 0;
-                                if (!file.is_open())
+                                std::ifstream file(new_url.c_str());
+                                if (!file.is_open()) 
                                 {
-                                std::cerr << "[Server 404] Impossible d'ouvrir le fichier here" << "\n";
+                                    std::cerr << "[Server] Impossible d'ouvrir image " << "\n";
                                 }
-                                // std::cerr << "[Server 1] Impossible d'ouvrir le fichier here" << "\n";
+                                // ////////std::cout << "here" << std::endl;
                                 buffer << file.rdbuf();
                                 file.close();
+                                SendResponse = buffer.str();
                             }
+                            if (new_url.find("GreatUpload.html") != std::string::npos )
+                            SendResponse = "HTTP/1.1 201 OK\r\n";  
+                            if (directory_listing == 1)
+                            {
+                                // std::string tmp;
+                                // tmp = root;
+                                // tmp += url;
+                                // // url = tmp; 
+                                //std::cout << "-->new_path directory_listing : "<< url << std::endl;
+                                SendResponse += AddContentType();
+                                SendResponse += "\r\n";
+                                SendResponse += generateHTML(url.c_str());
+                                dir = true;
+                                // ////////std::cout << "->new_url : "<< tmp << std::endl;
+                                // std::ifstream file(tmp.c_str());
+                                // if (!file.is_open()) 
+                                // {
+                                //     std::cerr << "[Server] Impossible d'ouvrir image " << "\n";
+                                // }
+                                // // ////////std::cout << "here" << std::endl;
+                                // buffer << file.rdbuf();
+                                // file.close();
+                            }
+                            // else if (url.find(".jpg") != std::string::npos || url.find(".png") != std::string::npos)
+                            // {
+                            //     //std::cout << "3---->new_url : "<< new_url << std::endl;
+                            //     std::ifstream file(new_url.c_str(), std::ios::binary);
+                            //     if (!file.is_open()) 
+                            //     {
+                            //         std::cerr << "[Server] Impossible d'ouvrir image " << "\n";
+                            //     }
+                                
+                            //     // ////////std::cout << "here" << std::endl;
+                            //     buffer << file.rdbuf();
+                            //     file.close();
+                            //     SendResponse += AddContentType();
+                            //     //std::cout << "---->char * : "<< new_url.c_str() << std::endl;
+                            //     // SendResponse += "Content-Type: image/jpg\r\n";
+                            // }
+                            // else if (url.find(".mp4") != std::string::npos)
+                            // {
+                            //     //std::cout << "4---->new_url : "<< new_url << std::endl;
+                            //     std::ifstream file(new_url.c_str(), std::ios::binary);
+                            //     if (!file.is_open()) 
+                            //     {
+                            //         std::cerr << "[Server] Impossible d'ouvrir le vedeo " << "\n";
+                            //     }
+                            //     buffer << file.rdbuf();
+                            //     //std::cout << "---->char * : "<< new_url.c_str() << std::endl;
+                            //     file.close();
+                            //     // std::stringstream fi;
+                            //     // std::ofstream fi("vedeo.mp4", std::ios::binary);
+                            //     // if (!fi.is_open()) 
+                            //     // {
+                            //     //     std::cerr << "[Server] Impossible d'ouvrir le vedeo " << "\n";
+                            //     // }
+                            //     // fi << buffer.rdbuf();
+                            //     SendResponse += AddContentType();
+                            //     // SendResponse += "Content-Type: video/mp4\r\n";
+                            // }
                             else
                             {
-                                std::cout << "ghid asad nkchm" << std::endl;
-                                buffer << file.rdbuf();
-                                file.close();
-                                SendResponse += AddContentType();
-                //                   {
-                //     std::cout << "---------------------------------"  << std::endl;
-                //     std::cout << "SendResponse : " << buffer.str() << std::endl;
-                //     std::cout << "---------------------------------"  << std::endl;
-                // }
+                                //////std::cout << "1---->new_url : "<< new_url << std::endl;
+                                if(check_cgi == true)
+                                    new_url = url;
+                                if (access(new_url.c_str(), R_OK) != 0 && check_cgi == false)
+                                {
+                                        //std::cout << "forbiden R_OFF" << std::endl;
+                                        std::string tmp;
+                                        // tmp = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/forbidden.html";
+                                        
+                                        std::ifstream file(tmp);
+                                        // check = 0;
+                                        if (!file.is_open())
+                                        {
+                                        std::cerr << "[Server 404] Impossible d'ouvrir le fichier here" << "\n";
+                                        }
+                                        // std::cerr << "[Server 1] Impossible d'ouvrir le fichier here" << "\n";
+                                        buffer << file.rdbuf();
+                                        file.close();
+                                }   
+                                else if (check_cgi == false)
+                                {
+                                    std::ifstream file(new_url.c_str(), std::ios::in);
+                                    if (!file.is_open()) 
+                                    {
+                                        file.close();
+                                        std::string tmp;
+                                        if(get_error_pages(convertIntToString(404)).empty())
+                                        {
+                                            errorpage = 1;
+                                            response_generate_error_page(SendResponse, generateErrorPage1(404, "notfound"));
+                                        }
+                                        else
+                                        {
+                                            tmp = root + get_error_pages(convertIntToString(404));
+                                            std::ifstream file(tmp);
+                                            // check = 0;
+                                            if (!file.is_open())
+                                            {
+                                                std::cerr << "[Server 404] Impossible d'ouvrir le fichier here" << "\n";
+                                            }
+                                            // std::cerr << "[Server 1] Impossible d'ouvrir le fichier here" << "\n";
+                                            buffer << file.rdbuf();
+                                            file.close();   
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //std::cout << "ghid asad nkchm" << std::endl;
+                                        //std::cout << "00---->new_url : "<< new_url << std::endl;
+                                        //std::cout << "---->char * : "<< new_url.c_str() << std::endl;
+                                        std::string buf;
+                                        buffer << file.rdbuf();
+                                        file.close();
+                                        SendResponse += AddContentType();
+                                        // //std::cout << "===================================================\n";
+                                        // while(getline(buffer, buf))
+                                        // {
+                                        //     //std::cout << buf << std::endl;
+                                        // }
+                                        // //std::cout << "===================================================";
+                        //                   {
+                        //     ////////std::cout << "---------------------------------"  << std::endl;
+                        //     ////////std::cout << "SendResponse : " << buffer.str() << std::endl;
+                        //     ////////std::cout << "---------------------------------"  << std::endl;
+                        // }
+                                    }
+                                    
+                                }
+                                // SendResponse += "Content-Type: text/html\r\n";                    
                             }
+                            // if (dir == false)
+                            // {
+                            //     SendResponse = AddContentType();
+                            // }
+                            // if (url.compare("/ErrorPages") != 0)
+                            // {
+                            //     SendResponse += "\r\n";
+                            //     SendResponse += buffer.str();
+                            // }
                             
+                            if(directory_listing == false && errorpage == 0)
+                            {
+                                // SendResponse += "Content-Length: " + convertIntToString(buffer.str().size()) + "\r\n";
+                                SendResponse += "\r\n";
+                                SendResponse += buffer.str();
+                            }
+                            if(new_url.find(".html") != std::string::npos)
+                            {
+                                // //std::cout << "---------------------------------"  << std::endl;
+                                // //std::cout << "SendResponse : " << SendResponse << std::endl;
+                                // //std::cout << "---------------------------------"  << std::endl;
+                            }
                         }
-                        // SendResponse += "Content-Type: text/html\r\n";                    
                     }
-                    // if (dir == false)
-                    // {
-                    //     SendResponse = AddContentType();
-                    // }
-                    // if (url.compare("/ErrorPages") != 0)
-                    // {
-                    //     SendResponse += "\r\n";
-                    //     SendResponse += buffer.str();
-                    // }
-                    
-                if(directory_listing == false)
-                {
-                    SendResponse += "\r\n";
-                    SendResponse += buffer.str();
-                }
-                if(new_url.find(".html") != std::string::npos)
-                {
-                    std::cout << "---------------------------------"  << std::endl;
-                    std::cout << "SendResponse : " << SendResponse << std::endl;
-                    std::cout << "---------------------------------"  << std::endl;
-                }
-                }
+                    // new_url = "";
+                    // url = "";
                 check_cgi = false;
-                check = true;
+                // check = true;
                 redur = false;
                 directory_listing = false;
+                
 }
