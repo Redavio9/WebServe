@@ -5,15 +5,42 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: rarraji <rarraji@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/08 19:27:07 by rarraji           #+#    #+#             */
-/*   Updated: 2024/01/08 19:32:08 by rarraji          ###   ########.fr       */
+/*   Created: 2024/02/25 16:03:47 by rarraji           #+#    #+#             */
+/*   Updated: 2024/06/01 21:02:49 by rarraji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parce.hpp"
+#include "Server.hpp"
 
+void fun(int i)
+{
+    (void)i;
+}
 int main(int ac, char **av)
 {
-  Parse s;
-  s.read_file(av[1]);
+    std::string name;
+    // (void) av;
+    signal(SIGPIPE, fun);
+    if(ac > 2)
+    {
+        ////////////std::cout << "just add the of the config file to the executable" << std::endl;
+        exit(0);
+    }
+    if(ac == 1)
+        name = "./config_file/config_file.badre";
+    else
+        name = av[1];
+    config_file conf(name);
+    Server server;
+    // std::vector<partition_server> servers = conf.get_servers();
+    server.servers = conf.get_servers();
+    // for(std::vector<partition_server>::iterator it = server.servers.begin(); it != server.servers.end(); it++)
+    // {
+    //     //////////std::cout<<it->get_root()<<std::endl;
+    // }   
+    server.CreatServers();  
+    server.run();
+    return  0;
+    //////////std::cout<<servers[0].get_port()<<std::endl;
+
 }
