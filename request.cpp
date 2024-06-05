@@ -429,11 +429,37 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
         if(methode == "DELETE")
         {
           std::string del = root + url;
-          if(utils::deletePath(del.c_str())==-1)
-            utils::removeDirectoryRecursively(del.c_str());
-          response.status = 200;
+          response.status = 204;
           response.methode = "DELETE";
-          response.url = generateErrorPage3(200, "DELETE_DONE");;
+          if(access(del.c_str(), F_OK) !=0)
+          {
+              response.status = 404;
+                if(get_error_pages(convertIntToString1(404)).empty())
+                {
+                    response.errorpage = 1;
+                    response.url = generateErrorPage3(404, "Not Found");
+                }
+                else
+                response.url = get_error_pages(convertIntToString1(404));
+
+          }
+          else if(utils::deletePath(del.c_str())==-1)
+          {
+            int res = utils::removeDirectoryRecursively(del.c_str());
+            if(res != 0)
+            {
+                response.status = 500;
+                if(get_error_pages(convertIntToString1(500)).empty())
+                {
+                    response.errorpage = 1;
+                    response.url = generateErrorPage3(500, "Internal Server Error");
+                }
+                else
+                response.url = get_error_pages(convertIntToString1(500));
+            }
+
+          }
+          // response.url = generateErrorPage3(204, "No Content");
         }
         else
         {

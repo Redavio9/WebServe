@@ -212,7 +212,13 @@ void Response::run()
         std::string new_url;
         // bool dir = false;
         new_url = url;
-        if(errorpage == 1 || methode == "DELETE")
+        if(methode == "DELETE" && status == 204)
+        {
+            SendResponse = "HTTP/1.1 204 No Content\r\n";
+            SendResponse += "Content-Type: text/html\r\n";
+            SendResponse += "Content-Lenght: 0\r\n";
+        }
+        if(errorpage == 1)
         {
             SendResponse = response_generate_error_page(SendResponse, new_url);
         }

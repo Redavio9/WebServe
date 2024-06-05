@@ -400,18 +400,6 @@ void Server::checkResponse1(int sock, std::string host)
                         }
                         else
                         {
-                            if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_methods("GET") != true)
-                            {
-                                    mapinfo[sock].request.response.status = 501;
-                                    if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
-                                    {
-                                        mapinfo[sock].request.response.errorpage = 1;
-                                        mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
-                                    }
-                                    else
-                                        mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
-                                    return;
-                            }
                             if (mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)
                                 mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.response.url;
 
@@ -435,7 +423,7 @@ void Server::checkResponse1(int sock, std::string host)
                     }
                 }
                    
-                    else if (stat(tmp1.c_str(), &fileStat) != 0)
+                    else if (stat(tmp1.c_str(), &fileStat) != 0 && mapinfo[sock].request.methode != "DELETE")
                     {
                         mapinfo[sock].request.response.status = 404;
                         if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
