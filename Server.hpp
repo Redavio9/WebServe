@@ -33,7 +33,6 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
-#include <thread>
 #include "infoserv.hpp"
 #include "./config_file/config_file.hpp"
 #include "./config_file/location_param.hpp"

@@ -177,15 +177,6 @@ int Server::CheckServerNmae(int i, std::string servername)
     return(0);
 }
 
-std::string long_to_string(long nb) 
-{
-    std::stringstream ss(nb);
-    std::string buf;
-    if(getline(ss, buf))
-    buf += '\0';
-    return(buf);
-}
-
 
 std::string generateErrorPage2(int statusCode, const std::string& errorMessage) 
 {

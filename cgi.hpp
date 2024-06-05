@@ -32,7 +32,6 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
-#include <thread>
 #include <sys/stat.h>
 
 class Cgi

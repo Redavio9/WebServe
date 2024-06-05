@@ -48,7 +48,7 @@ void config_file::is_valid_host(partition_server *new_server ,const std::string&
     std::memset(&hint, 0,sizeof(hint));
     hint.ai_family = AF_INET;
     hint.ai_socktype = SOCK_STREAM;
-    int status = getaddrinfo(hostname.c_str(), nullptr, &hint, &res);
+    int status = getaddrinfo(hostname.c_str(), NULL, &hint, &res);
     if (status != 0)
     {
         freeaddrinfo(res);
@@ -413,7 +413,7 @@ std::vector<partition_server> config_file::split_servers(std::vector<std::string
 config_file::config_file(const std::string& name_of_file)
 {
     std::string line;
-    std::ifstream file(name_of_file);
+    std::ifstream file(name_of_file.c_str());
     if(!file.is_open())
     {
         utils::print_error("error in name of config file : ", name_of_file);
@@ -427,7 +427,7 @@ config_file::config_file(const std::string& name_of_file)
 
 bool config_file::delete_file(std::string name_of_file)
 {
-    std::ifstream file(name_of_file);
+    std::ifstream file(name_of_file.c_str());
     if(file)
     {
         file.close();

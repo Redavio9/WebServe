@@ -33,7 +33,6 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
-#include <thread>
 #include "cgi.hpp"
 #include "response.hpp"
 #include "./config_file/location_param.hpp"

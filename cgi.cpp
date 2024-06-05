@@ -72,9 +72,7 @@ void Cgi::run()
     en[3] = (char *)methode.c_str();
     en[4] = (char *)url.c_str();
     en[5] = NULL;
-    char s[100];
     chdir(root.c_str());
-    printf("%s\n", getcwd(s, 100));
     int outputFile = open("output.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     std::ofstream ss("./input.txt");
     if(ss.is_open())

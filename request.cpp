@@ -145,11 +145,9 @@ void Request::CreatFiles(std::string NameFile, std::string buf, bool check)
 {
     if (check)
     {
-      char s[100];
       std::string tmp = root + get_location(url).get_upload_dir().c_str();
       chdir(tmp.c_str());
-      printf("%s\n", getcwd(s, 100));
-      std::ofstream outputFile(NameFile , std::ios::binary);
+      std::ofstream outputFile(NameFile.c_str() , std::ios::binary);
       if (!outputFile.is_open()) 
       {
         std::cerr << "Error: Unable to open file " << NameFile << std::endl;
@@ -159,11 +157,9 @@ void Request::CreatFiles(std::string NameFile, std::string buf, bool check)
     }
     else
     {
-      char s[100];
       std::string tmp = root + get_location(url).get_upload_dir().c_str();
       chdir(tmp.c_str());
-      printf("%s\n", getcwd(s, 100));
-      std::ofstream outputFile(NameFile);
+      std::ofstream outputFile(NameFile.c_str());
       if (!outputFile.is_open()) 
       {
         std::cerr << "Error: Unable to open file " << NameFile << std::endl;
@@ -175,7 +171,7 @@ void Request::CreatFiles(std::string NameFile, std::string buf, bool check)
 
 int checkImgOrText(std::string buf)
 {
-  if (int pos = buf.find("image") != std::string::npos)
+  if (buf.find("image") != std::string::npos)
     return(1);
   return (0);  
 }
