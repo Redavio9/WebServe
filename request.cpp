@@ -495,7 +495,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
             response.SetUrl(url);
             response.check_body = false; 
           }
-          if (response.url.find(".py") != std::string::npos && cgi == false)
+          if (response.url.find(".py") != std::string::npos && cgi == false && methode == "POST")
           {
               struct stat sb;
               std::string tmp_url = root + url;

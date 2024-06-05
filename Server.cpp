@@ -260,14 +260,15 @@ void Server::checkResponse1(int sock, std::string host)
                     mapinfo[sock].request.response.new_redur = mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url();
                     return;
                 }
+                std::cout << "len: " << mapinfo[sock].get_location_first(mapinfo[sock].request.url) << std::endl;
                 if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
                 {
                     size_t len = mapinfo[sock].get_location_first(mapinfo[sock].request.url).size();
-                    std::cout << "len: " << mapinfo[sock].get_location_first(mapinfo[sock].request.url) << std::endl;
                     // size_t pos = mapinfo[sock].request.url.find(mapinfo[sock].get_location_first(mapinfo[sock].request.url));
                     mapinfo[sock].request.response.url = mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias() + mapinfo[sock].request.url.substr(len);
                     std::cout << "alias " << mapinfo[sock].request.response.url << std::endl;
                     tmp1 = mapinfo[sock].request.response.url;
+
                     // mapinfo[sock].request.url = mapinfo[sock].request.response.url;
                 }
                 if (stat(tmp1.c_str(), &fileStat) == 0) 
@@ -375,21 +376,20 @@ void Server::checkResponse1(int sock, std::string host)
                             }
                             else
                             {
-                                
-                                    mapinfo[sock].request.response.status = 403;
-                                    if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
+                                mapinfo[sock].request.response.status = 403;
+                                if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
+                                {
+                                    mapinfo[sock].request.response.errorpage = 1;
+                                    mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "FORBIDEN");
+                                }
+                                else
+                                {
+                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
+                                    if(stat(mapinfo[sock].request.response.url.c_str(), &fileStat) != 0)
                                     {
                                         mapinfo[sock].request.response.errorpage = 1;
                                         mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "FORBIDEN");
                                     }
-                                    else
-                                    {
-                                        mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
-                                        if(stat(mapinfo[sock].request.response.url.c_str(), &fileStat) != 0)
-                                        {
-                                            mapinfo[sock].request.response.errorpage = 1;
-                                            mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "FORBIDEN");
-                                        }
 
                                 }
                                 
@@ -402,48 +402,89 @@ void Server::checkResponse1(int sock, std::string host)
                         {
                             if (mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)
                                 mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.response.url;
-
+                            
                             return;    
                         }
 
                     }
-                    if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
-                    {
-                        std::cout << "alias" << std::endl;
-                        if(mapinfo[sock].request.response.url.find(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias()) == std::string::npos)
-                            mapinfo[sock].request.response.url = mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias() +  mapinfo[sock].request.response.url;
-                            return;
-                    }
+                    // if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
+                    // {
+                    //     std::cout << "alias" << std::endl;
+                    //     if(mapinfo[sock].request.response.url.find(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias()) == std::string::npos)
+                    //         mapinfo[sock].request.response.url = mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias() +  mapinfo[sock].request.response.url;
+                    //         return;
+                    // }
                     else
                     {
-                        if(mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)
+                        if(mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos && mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() < 1)
                             mapinfo[sock].request.response.url = mapinfo[sock].root +  mapinfo[sock].request.response.url;
                         std::cout << "file :" << mapinfo[sock].request.response.url << std::endl;
+                        
+                        
+                        if(mapinfo[sock].request.response.url.find(".py") != std::string::npos)
+                        {
+                            mapinfo[sock].request.response.check_cgi = true;
+                            Cgi cgi;
+                            cgi.SetHeader(mapinfo[sock].request.header);
+                            cgi.SetBody(mapinfo[sock].request.new_body);
+                            cgi.url = mapinfo[sock].request.response.url;
+                            cgi.root = mapinfo[sock].request.root;
+                            cgi.querystingcgi = mapinfo[sock].request.querystingcgi;
+                            cgi.methode = mapinfo[sock].request.methode;
+                            cgi.run();
+                            if (cgi.time_out == 1)
+                            {
+                                mapinfo[sock].request.response.check_cgi = false;
+                                mapinfo[sock].request.response.status = 500;
+                                if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
+                                {
+                                    mapinfo[sock].request.response.errorpage = 1;
+                                    mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
+                                }
+                                else
+                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
+                            }
+                            if (cgi.status_code_error == 1)
+                            {
+                            mapinfo[sock].request.response.check_cgi = false;
+                            mapinfo[sock].request.response.status = 504;
+                                if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
+                                {
+                                    mapinfo[sock].request.response.errorpage = 1;
+                                    mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "notImplemented");
+                                }
+                                else
+                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
+                            }
+                            else
+                                mapinfo[sock].request.response.url = mapinfo[sock].root + "/output.txt";
+                        }
+                        
                         return;
                     }
                 }
                    
-                    else if (stat(tmp1.c_str(), &fileStat) != 0 && mapinfo[sock].request.methode != "DELETE")
+                else if (stat(tmp1.c_str(), &fileStat) != 0 && mapinfo[sock].request.methode != "DELETE")
+                {
+                    mapinfo[sock].request.response.status = 404;
+                    if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
                     {
-                        mapinfo[sock].request.response.status = 404;
-                        if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
+                        mapinfo[sock].request.response.errorpage = 1;
+                        mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "NOT-FOUND");
+                    }
+                    else
+                    {
+                        mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
+                        if(stat(mapinfo[sock].request.response.url.c_str(), &fileStat) != 0)
                         {
                             mapinfo[sock].request.response.errorpage = 1;
                             mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "NOT-FOUND");
                         }
-                        else
-                        {
-                            mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status));
-                            if(stat(mapinfo[sock].request.response.url.c_str(), &fileStat) != 0)
-                            {
-                                mapinfo[sock].request.response.errorpage = 1;
-                                mapinfo[sock].request.response.url = generateErrorPage2(mapinfo[sock].request.response.status, "NOT-FOUND");
-                            }
-                            
-                            
-                        }
-                        return;
+                        
+                        
                     }
+                    return;
+                }
 }
 
 
@@ -506,7 +547,6 @@ void Server::run()
                     checkResponse1(i, mapinfo[i].request.host);
                     mapinfo[i].request.response.run();
 
-                    
                     mapinfo[i].request.s = send(i,  mapinfo[i].request.response.SendResponse.c_str() + mapinfo[i].request.se, mapinfo[i].request.response.SendResponse.size() - mapinfo[i].request.se, 0);
 
                     mapinfo[i].request.se += mapinfo[i].request.s;

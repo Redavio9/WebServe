@@ -191,9 +191,15 @@ void Response::run()
 
     if (redur == true)
     {
+
         SendResponse = "HTTP/1.1 301 Moved Permanently\r\n";
         SendResponse += "Content-Type: text/html\r\n";
-        SendResponse += "Location: " + new_redur;
+        SendResponse += "Location: " + new_redur + "\r\n";
+        SendResponse += "\r\n";
+
+
+        std::cout << "ana ssf redir" << std::endl;
+        
     }
     else
     {
@@ -225,17 +231,17 @@ void Response::run()
         else
         {
 
-            // if (new_url.find(".txt") != std::string::npos)
-            // {
-            //     std::ifstream file(new_url.c_str());
-            //     if (!file.is_open()) 
-            //     {
-            //         std::cerr << "[Server] Impossible d'ouvrir file " << "\n";
-            //     }
-            //     buffer << file.rdbuf();
-            //     file.close();
-            //     SendResponse = buffer.str();
-            // } 
+            if (new_url.find(".txt") != std::string::npos && check_cgi == true)
+            {
+                std::ifstream file(new_url.c_str());
+                if (!file.is_open()) 
+                {
+                    std::cerr << "[Server] Impossible d'ouvrir file " << "\n";
+                }
+                buffer << file.rdbuf();
+                file.close();
+                SendResponse = buffer.str();
+            } 
             if (directory_listing == 1)
             {
                 SendResponse += AddContentType();
@@ -288,5 +294,5 @@ void Response::run()
     check_cgi = false;
     redur = false;
     directory_listing = false;
-                
+
 }

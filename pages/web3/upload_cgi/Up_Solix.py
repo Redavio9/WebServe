@@ -98,7 +98,7 @@ form = cgi.FieldStorage()
 
 def upload(filename):
     if filename not in form:
-        print("Failed to upload file!")
+        print("Failed to upload file!", file=sys.stderr)
         exit()
 
     fileitem = form[filename]
@@ -143,5 +143,5 @@ def upload(filename):
 
 
 upload('file1')
-upload('file2')
-upload('file3')
+# upload('file2')
+# upload('file3')

@@ -30,9 +30,8 @@ server:
 			alias: /Users/bel-kdio/Desktop/WebServe/pages/web3/
 
 
-		location: /server1/web1/
-			directory_listing: true
-			methods: GET POST
+		location: /redir/
+			redirect_URL: https://google.com
 
 		location: /cgi/
 			index: main.py
