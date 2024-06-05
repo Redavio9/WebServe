@@ -24,7 +24,7 @@ void config_file::check_if_ports_is_duplicated(partition_server new_server)
         if (tmp[i] == tmp[i - 1])
             utils::print_error("duplicate port :" ,tmp[i]);
     }
-    if(new_server.get_host() == 1 || new_server.get_ports().size() == 0 || new_server.get_root().empty() || new_server.get_index().empty())
+    if(new_server.get_host() == -1 || new_server.get_ports().size() == 0 || new_server.get_root().empty() || new_server.get_index().empty())
         utils::print_error("you should set : ", " host - port - index - root ");
 }
 
