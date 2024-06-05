@@ -105,20 +105,20 @@ std::string Response::generateHTML(const char* path) {
 
 std::string Response::AddContentType()
 {
-    std::cout << "an3mr contant type\n";
+    // std::cout << "an3mr contant type\n";
     std::string part = "Content-Type: ";
     std::string check;
     size_t pos = url.find('.');
     if (pos != std::string::npos)
     {
         check = url.substr(pos + 1 , url.length());
-        std::cout << "****" << check << std::endl;
+        // std::cout << "****" << check << std::endl;
         for (std::map<std::string, std::string>::iterator it = ContentType.begin(); it != ContentType.end(); ++it)
         {
             if(check.compare(it->first) == 0)
             {
                 
-                std::cout << "HNA : ---> "<< it->second << std::endl;
+                // std::cout << "HNA : ---> "<< it->second << std::endl;
                 part += it->second;
                 part += "\r\n";
                 break;
@@ -203,8 +203,8 @@ void Response::run()
                     std::string new_url;
                     bool dir = false;
                     new_url = url;
-                    std::cout << "new_url -- > " << new_url << std::endl;
-                    std::cout << "errorpage -- > " << errorpage << std::endl;
+                    // std::cout << "new_url -- > " << new_url << std::endl;
+                    // std::cout << "errorpage -- > " << errorpage << std::endl;
                     if(errorpage == 1 || methode == "DELETE")
                     {
 
@@ -228,7 +228,7 @@ void Response::run()
                             if (directory_listing == 1)
                             {
 
-                                std::cout << "-->new_path directory_listing : "<< url << std::endl;
+                                // std::cout << "-->new_path directory_listing : "<< url << std::endl;
                                 SendResponse += AddContentType();
                                 SendResponse += "\r\n";
                                 SendResponse += generateHTML(url.c_str());
@@ -237,7 +237,7 @@ void Response::run()
                             
                             else
                             {
-                                std::cout << "1---->new_url : "<< new_url << std::endl;
+                                // std::cout << "1---->new_url : "<< new_url << std::endl;
                                 if(check_cgi == true)
                                     new_url = url; 
                                 else if (check_cgi == false)
@@ -249,10 +249,10 @@ void Response::run()
                                         std::string tmp;
                                         if(get_error_pages(convertIntToString(404)).empty())
                                         {
-                                            std::cout << "lslllslls: |" << new_url.c_str() << "|" << std::endl;
+                                            // std::cout << "lslllslls: |" << new_url.c_str() << "|" << std::endl;
                                             errorpage = 1;
                                             SendResponse = response_generate_error_page(SendResponse, generateErrorPage1(404, "notfound"));
-                                            std::cout << SendResponse << std::endl;
+                                            // std::cout << SendResponse << std::endl;
                                         }
                                         else
                                         {
@@ -261,8 +261,8 @@ void Response::run()
                                     }
                                     else
                                     {
-                                        std::cout << "00---->new_url : "<< new_url << std::endl;
-                                        std::cout << "---->char * : "<< new_url.c_str() << std::endl;
+                                        // std::cout << "00---->new_url : "<< new_url << std::endl;
+                                        // std::cout << "---->char * : "<< new_url.c_str() << std::endl;
                                         std::string buf;
                                         buffer << file.rdbuf();
                                         file.close();
@@ -274,7 +274,7 @@ void Response::run()
                             }
                             if(directory_listing == false && errorpage == 0)
                             {
-                                std::cout << "file 3adi \n";
+                                // std::cout << "file 3adi \n";
                                 SendResponse += "\r\n";
                                 SendResponse += buffer.str();
                             }

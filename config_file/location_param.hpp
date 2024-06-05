@@ -18,6 +18,7 @@ class location_param
         std::string root;
         std::string alias;
     public:
+        
         location_param();
         ~location_param();
         void set_redirect_url(std::string);

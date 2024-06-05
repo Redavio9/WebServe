@@ -15,7 +15,28 @@ server:
 		413: ErrorPages/413.html
 
 location: /
-	alias: /Users/bel-kdio/Desktop/WS_BETTA/pages/web1/
 	upload_dir: /upload
+	index: index_.html
+	methods: GET POST
+
+
+location: /upload_cgi/
+	index: upload.html
+	methods: GET POST
+
+
+location: /redir/
+	redirect_URL: http://localhost:2006/server1/
+
+
+location: /server1/
 	index: index.html
+	methods: GET
+
+location: /server1/web1/
+	directory_listing: true
+	methods: GET POST
+
+location: /cgi/
+	index: main.py
 	methods: GET POST

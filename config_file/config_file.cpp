@@ -2,6 +2,7 @@
 
 #include <iterator>
 
+
 void config_file::check_if_duplicate_server()
 {
     for (size_t i = 0; i < servers.size(); ++i) {
@@ -40,22 +41,24 @@ bool config_file::first_char_after_whitespace(const std::string &str, char c)
     return false;
 }
 
-void config_file::is_valid_host(partition_server *new_server ,const std::string& hostname) {
-  addrinfo *res;
-  addrinfo hint;
-  std::memset(&hint, 0,sizeof(hint));
-  hint.ai_family = AF_INET;
-  hint.ai_socktype = SOCK_STREAM;
-  int status = getaddrinfo(hostname.c_str(), nullptr, &hint, &res);
-  if (status != 0) {
+void config_file::is_valid_host(partition_server *new_server ,const std::string& hostname) 
+{
+    addrinfo *res;
+    addrinfo hint;
+    std::memset(&hint, 0,sizeof(hint));
+    hint.ai_family = AF_INET;
+    hint.ai_socktype = SOCK_STREAM;
+    int status = getaddrinfo(hostname.c_str(), nullptr, &hint, &res);
+    if (status != 0)
+    {
+        freeaddrinfo(res);
+        utils::print_error("error in this part :", hostname);
+        exit(1);
+    }
+    sockaddr_in* sock = (sockaddr_in*) res->ai_addr;
+    long int ip = htonl(sock->sin_addr.s_addr);
     freeaddrinfo(res);
-    utils::print_error("error in this part :", hostname);
-    exit(1);
-  }
-  sockaddr_in* sock = (sockaddr_in*) res->ai_addr;
-  long int ip = htonl(sock->sin_addr.s_addr);
-  freeaddrinfo(res);
-  new_server->set_host(ip);
+    new_server->set_host(ip);
 }
 
 int config_file::convert_string_to_int(std::string str)
@@ -86,14 +89,14 @@ void config_file::split_by_char_and_store_in_vector(std::string str, char c, std
     }
 }
 
-bool config_file::only_whitespace(const std::string& str) {
-  for (unsigned long i = 0; i < str.size(); i++) {
-    if (str[i] != ' ' && str[i] != '\t' && str[i] != '\n' ) {
-      return false;
+bool config_file::only_whitespace(const std::string& str)
+{
+    for (unsigned long i = 0; i < str.size(); i++) 
+    {
+        if (str[i] != ' ' && str[i] != '\t' && str[i] != '\n' ) 
+            return false;
     }
-  }
-
-  return true;
+    return true;
 }
 
 int config_file::count_alphabetic_and_check_is_digits(char c, std::string str, int number, int min , int max)
@@ -168,7 +171,6 @@ int config_file::check_location(std::string index, std::string value, location_p
         if(loc.get_methods("GET") || loc.get_methods("POST") || loc.get_methods("DELETE"))
             utils::print_error("duplicate in this part : ", index);
         loc.set_methods(value);
-
     }
     else if (index == "upload_dir")
     {
@@ -196,7 +198,6 @@ int config_file::check_location(std::string index, std::string value, location_p
         if(!first_char_after_whitespace(value, '/') || !loc.get_alias().empty())
             utils::print_error("error in this part :", value);
         loc.set_root(value +'/');
-    
     }
     else if (index == "alias")
     {
@@ -206,7 +207,8 @@ int config_file::check_location(std::string index, std::string value, location_p
             utils::print_error("error in this part :", value);
         loc.set_alias(value);
     
-    }else
+    }
+    else
         return(1);
     return(0);
 }
@@ -234,11 +236,11 @@ void config_file::multiple_srv_with_with_multiple_port(partition_server new_serv
         server.set_port(new_server.get_ports()[i]);
         servers.push_back(server);
     }
-    
 }
 
 int config_file::check_and_store_data(partition_server *new_server, std::vector<std::string>::iterator& it)
 {
+    location_param loc;
     std::stringstream ss(*it);
     std::string index;
     std::string value;
@@ -297,6 +299,7 @@ int config_file::check_and_store_data(partition_server *new_server, std::vector<
         ss>>value;
         if(!ss.eof())
             utils::print_error("error in this part : ", value);
+        utils::big_index=value;
         new_server->set_index(value);
     }
     else if (index == "error_pages")
@@ -346,7 +349,6 @@ int config_file::check_and_store_data(partition_server *new_server, std::vector<
             std::getline(sl, value);
             index.erase(0, index.find_first_not_of(" \t"));
             value.erase(0, value.find_first_not_of(" \t"));
-            location_param loc;
             while (index == "redirect_URL" || index == "index" || index == "methods" || index == "directory_listing" || index == "upload_dir" || index == "directory_listing" || index == "root" || index == "alias")
             {
                 if(check_location(index, value, loc))
@@ -440,7 +442,6 @@ bool config_file::delete_file(std::string name_of_file)
 
 config_file::config_file()
 {
-    
 }
 
 config_file::~config_file()

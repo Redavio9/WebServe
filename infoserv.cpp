@@ -13,7 +13,6 @@
 
 #include "infoserv.hpp"
 
-
 void infoserv::set_location(std::string index, location_param value)
 {
     location[index] = value;
@@ -46,6 +45,7 @@ location_param infoserv::get_location(std::string key)
         {
             location_param loc;
             loc.set_methods("GET");
+            loc.set_index(utils::big_index);
             set_location("/", loc);
             return loc;
         }

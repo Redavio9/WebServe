@@ -16,6 +16,7 @@
 #include "request.hpp"
 #include "./config_file/location_param.hpp"
 #include "./config_file/partition_server.hpp"
+#include "./config_file/utils.hpp"
 
 class Request;
 // class Response;

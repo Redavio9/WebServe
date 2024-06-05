@@ -18,7 +18,7 @@ namespace utils{
     std::string trim_space_from_back(std::string str);
     int deletePath(const char* path);
     void removeDirectoryRecursively(const char *path);
-
+    extern std::string big_index;
 }
 
 #endif

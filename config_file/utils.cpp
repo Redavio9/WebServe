@@ -1,5 +1,9 @@
 #include "utils.hpp"
 
+namespace utils {
+    std::string big_index = "";
+}
+
 std::string utils::delete_all_whitespace_and_set_one_space(std::string str)
 {
     std::string word;

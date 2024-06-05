@@ -198,7 +198,7 @@ void Request::UploadFiles()
   bool check = false;
   getline(ss,buf);
   std::string Myboundary = buf.substr(0 , buf.length() - 1);
-  std::cout << "=====================================ana hna" << Myboundary << std::endl;
+  // std::cout << "=====================================ana hna" << Myboundary << std::endl;
   while (getline(ss,buf))
   {
     size_t pos;
@@ -280,7 +280,7 @@ int Request::check_req_valid()
           if(methode.compare("GET") != 0 && methode.compare("POST") != 0 && methode.compare("DELETE") != 0)
           {
             response.status = 501;
-            std::cout << "Not Implemented" << std::endl;
+            // std::cout << "Not Implemented" << std::endl;
             if(get_error_pages(convertIntToString1(501)).empty())
             {
                 response.errorpage = 1;
@@ -299,10 +299,10 @@ int Request::check_req_valid()
           //check URL !!!!!!
           checkQuery();
           // if error is a probleme 414
-        std::cout << "url :" << url << std::endl;
+        // std::cout << "url :" << url << std::endl;
         if(get_location(url).get_methods(methode) == false)
         {
-            std::cout << "Not allowed" << std::endl;
+            // std::cout << "Not allowed" << std::endl;
             response.status = 405;
             if(get_error_pages(convertIntToString1(4)).empty())
             {
@@ -320,7 +320,7 @@ int Request::check_req_valid()
           if (buff.compare("HTTP/1.1") != 0)
           {
             
-            std::cout << "-->"<< buff  << "-->" << std::endl;
+            // std::cout << "-->"<< buff  << "-->" << std::endl;
             // std::string reqerror = "/Users/rarraji/Desktop/prj/WebServMerge/pages/ErrorPages/HTTP_version.html";
             // return(0);
             // response with 505
@@ -377,6 +377,7 @@ location_param Request::get_location(std::string key)
         {
             location_param loc;
             loc.set_methods("GET");
+            loc.set_index(utils::big_index);
             set_location("/", loc);
             return loc;
         }
@@ -462,14 +463,14 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
           if ((pos = header.find("\r\n\r\n")) != std::string::npos)
             header = header.substr(0, pos + 2);
  
-          std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
-          std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
-          std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
+          // std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
+          // std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
+          // std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
           // std::cout << url << "-->" << get_location(url).get_upload_dir().length() << std::endl;
-          std::cout << methode << "-->"  << std::endl;
+          // std::cout << methode << "-->"  << std::endl;
           if (get_location(url).get_upload_dir().length() > 0 && methode == "POST")
           {
-            std::cout << "get_method" << get_location(url).get_methods("POST") << std::endl;
+            // std::cout << "get_method" << get_location(url).get_methods("POST") << std::endl;
             if(get_location(url).get_methods("POST") == false)
             {
               response.status = 405;
@@ -483,7 +484,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
             }
             else
             {
-              std::cout << "ghid ahila\n";
+              // std::cout << "ghid ahila\n";
               cgi = true;
               UploadFiles();
             }
@@ -523,7 +524,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
                 cgi.run();
                 if (cgi.time_out == 1)
                 {
-                  std::cout << "hna\n";
+                  // std::cout << "hna\n";
                   response.check_cgi = false;
                   response.status = 504;
                   if(get_error_pages(convertIntToString1(504)).empty())
@@ -536,7 +537,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
                 }
                 if (cgi.status_code_error == 1)
                 {
-                  std::cout << "hna\n";
+                  // std::cout << "hna\n";
                   response.check_cgi = false;
                   response.status = 500;
                   if(get_error_pages(convertIntToString1(500)).empty())
@@ -549,7 +550,7 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
                 }
                 else
                   response.url = "/output.txt";
-                std::cout << "response.errorpage : "<< response.errorpage << std::endl;
+                // std::cout << "response.errorpage : "<< response.errorpage << std::endl;
               }
           }
         }

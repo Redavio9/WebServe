@@ -267,7 +267,7 @@ void Cgi::run()
           size_t pos = buffer.find("\r\n") + 2;
           std::string content_L = "Content-Length: " + itoa(buffer.substr(buffer.find("\r\n\r\n") + 4).size()) + "\r\n";
           buffer.insert(pos, content_L);
-          std::cout << "sllslsl " <<buffer << std::endl;
+          // std::cout << "sllslsl " <<buffer << std::endl;
         }
         close(outputFile);
         std::ofstream file("output.txt", std::ios::in);
