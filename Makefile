@@ -13,7 +13,7 @@
 NAME    = Server
 
 CC      = c++
-FLAGS   = -Wall -Wextra -Werror -std=c++98 #-fsanitize=address -g
+FLAGS   = -Wall -Wextra -Werror -std=c++98 
 RM      = rm -rf
 SRC     = main.cpp Server.cpp request.cpp cgi.cpp response.cpp infoserv.cpp ./config_file/config_file.cpp ./config_file/partition_server.cpp ./config_file/location_param.cpp ./config_file/utils.cpp
 OBJ     = $(SRC:.cpp=.o) 

@@ -287,7 +287,7 @@ int config_file::check_and_store_data(partition_server *new_server, std::vector<
         value = utils::delete_all_whitespace_and_set_one_space(value);
         if(!new_server->get_max_body_size().empty())
             utils::print_error("duplicate in this part : ", index);
-        count_alphabetic_and_check_is_digits('\n', value, -1, 0, 21000000);
+        count_alphabetic_and_check_is_digits('\n', value, -1, 0, 30000000);
         new_server->set_max_body_size(value);
     }
     else if (index == "index" && !value.empty())

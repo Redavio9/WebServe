@@ -114,7 +114,6 @@ int Server::create_server_socket1(int sock)
     if (status !=   0) 
     {
         std::cerr << "[Server] Bind error: " << strerror(errno) << std::endl;
-        // return (-1);
     }
 
     status = listen(socket_fd, 100000);
@@ -240,9 +239,6 @@ void Server::checkResponse1(int sock, std::string host)
                 struct stat direStat;
                 std::string tmp1;
                 mapinfo[sock].request.response.redur = false;
-                // std::cout << "url : " << mapinfo[sock].request.response.url << std::endl;
-                // std::cout << "url req: " << mapinfo[sock].request.url << std::endl;
-                // std::cout << "root + url : " <<  mapinfo[sock].root +  mapinfo[sock].request.response.url << std::endl;
                 if (mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)
                 {
                     if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
@@ -261,15 +257,12 @@ void Server::checkResponse1(int sock, std::string host)
                 stat(tmp1.c_str(), &direStat);
                 if(tmp1[tmp1.length() - 1] != '/' && mapinfo[sock].request.methode != "DELETE" && S_ISDIR(direStat.st_mode))
                 {
-                    // std::cout << "hnaaaa a3chir \n";
                     mapinfo[sock].request.url += '/';
                     mapinfo[sock].request.response.url += '/'; 
                     mapinfo[sock].request.response.redur = true;
                     mapinfo[sock].request.response.new_redur = mapinfo[sock].request.response.url;
-                    // std::cout << "-->*"<< mapinfo[sock].request.response.new_redur << std::endl;
                     return;
                 }
-                // std::cout << "98989898989898" << tmp1.c_str() << std::endl;
                 if (mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url().length() >= 1)
                 {
                     mapinfo[sock].request.response.redur = true;
@@ -278,42 +271,37 @@ void Server::checkResponse1(int sock, std::string host)
                 }
                 else if (stat(tmp1.c_str(), &fileStat) == 0) 
                 {
-                    // std::cout << "tmp1 ==>: " << tmp1 << std::endl;
                     int j = 0;
 
                     if (S_ISDIR(fileStat.st_mode))
                     {
-                        // std::cout << "dossier\n";
                         std::string tmp  = tmp1;
 
                         if(tmp1.find(".py") != std::string::npos)
                             j = 1;
-                        // std::cout << "methode : "<< mapinfo[sock].request.methode << std::endl;
-                        // std::cout << "errorpage : "<< mapinfo[sock].request.response.errorpage << std::endl;
                         if(mapinfo[sock].request.methode != "DELETE")
                         {
 
-                            if(this->mapinfo[sock].get_location_first(mapinfo[sock].request.url ).compare((mapinfo[sock].request.url)) == 0) 
-                            {
-                                // check_red = true;
-                                //std::cout << "DONE IS LOCATION" << std::endl;
-                            }
-                            else
-                            {
-                                //std::cout << "ISN'T LOCATION" << std::endl;
-                                j = 1;
-                            }
+                            // if(this->mapinfo[sock].get_location_first(mapinfo[sock].request.url ).compare((mapinfo[sock].request.url)) == 0) 
+                            // {
+                            //     // check_red = true;
+                            //     std::cout << "DONE IS LOCATION" << std::endl;
+                            // }
+                            // else
+                            // {
+                            //     std::cout << "ISN'T LOCATION" << std::endl;
+                            //     j = 1;
+                            // }
                             // std::cout << "index To serve : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_index().length() << std::endl;   
                             if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_index().length() > 1)
                             {
                                 if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
                                 {
-                                    // std::cout << "lenght alias : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() << std::endl;   
                                     mapinfo[sock].request.response.url = mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias() + mapinfo[sock].get_location(mapinfo[sock].request.url).get_index();
                                 }
                                 else
                                 {
-                                    mapinfo[sock].request.response.url = mapinfo[sock].root;    //!!!!!
+                                    mapinfo[sock].request.response.url = mapinfo[sock].root;
                                     mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location_first(mapinfo[sock].request.url);
                                     mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location(mapinfo[sock].request.url).get_index();
                                 }
@@ -328,10 +316,8 @@ void Server::checkResponse1(int sock, std::string host)
                                     cgi.querystingcgi = mapinfo[sock].request.querystingcgi;
                                     cgi.methode = mapinfo[sock].request.methode;
                                     cgi.run();
-                                    // std::cout << "+++++";
                                     if (cgi.time_out == 1)
                                     {
-                                        // std::cout << "hna\n";
                                         mapinfo[sock].request.response.check_cgi = false;
                                         mapinfo[sock].request.response.status = 500;
                                         if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
@@ -344,7 +330,6 @@ void Server::checkResponse1(int sock, std::string host)
                                     }
                                     if (cgi.status_code_error == 1)
                                     {
-                                    // std::cout << "hna\n";
                                     mapinfo[sock].request.response.check_cgi = false;
                                     mapinfo[sock].request.response.status = 504;
                                         if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
@@ -416,7 +401,6 @@ void Server::checkResponse1(int sock, std::string host)
                         }
 
                     }
-                        // std::cout << "tmp1 ++: " << tmp1 << std::endl;
                         if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
                         {
                             std::cout << "alias" << std::endl;
@@ -432,8 +416,6 @@ void Server::checkResponse1(int sock, std::string host)
                    
                     else if (stat(tmp1.c_str(), &fileStat) != 0)
                     {
-                    // std::cout << "stat : " << tmp1.c_str() <<std::endl;
-                        // std::cout << "tmp1 --: " << tmp1 << std::endl;
                         mapinfo[sock].request.response.status = 404;
                         if(mapinfo[sock].get_error_pages(convertIntToString2(mapinfo[sock].request.response.status)).empty())
                         {
@@ -467,8 +449,6 @@ void Server::run()
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
 
-
-    // boucler sur les socket
     for (size_t i = 0; i < Sockets.size(); i++)
     {
         FD_SET(Sockets[i], &read_fds);
@@ -492,8 +472,6 @@ void Server::run()
             std::cerr << "[Server] Select error: " << strerror(errno) << std::endl;
             return;
         } 
-
-        // boucler number of socket 
         for (int i = 3; i <= fd_max; i++) 
         {
             struct stat sb;
@@ -512,9 +490,6 @@ void Server::run()
                 {
                     if(it->first == i)
                     {
-                        // std::cout << "------------------------------------------------------------------------\n";
-                        // std::cout << mapinfo[i].root << std::endl;
-                        // std::cout << "------------------------------------\n";
                         break;
                     }
                 }

@@ -17,7 +17,6 @@
 Response::Response()
 {
     status = 0;
-//   check_cgi = false;
 }
 Response::~Response()
 {
@@ -105,20 +104,16 @@ std::string Response::generateHTML(const char* path) {
 
 std::string Response::AddContentType()
 {
-    // std::cout << "an3mr contant type\n";
     std::string part = "Content-Type: ";
     std::string check;
     size_t pos = url.find('.');
     if (pos != std::string::npos)
     {
         check = url.substr(pos + 1 , url.length());
-        // std::cout << "****" << check << std::endl;
         for (std::map<std::string, std::string>::iterator it = ContentType.begin(); it != ContentType.end(); ++it)
         {
             if(check.compare(it->first) == 0)
             {
-                
-                // std::cout << "HNA : ---> "<< it->second << std::endl;
                 part += it->second;
                 part += "\r\n";
                 break;
@@ -137,12 +132,6 @@ std::string Response::AddContentType()
     }
     return(part);   
 }
-
-
-
-
-
-
 
 std::string Response::get_error_pages(std::string key)
 {
@@ -180,108 +169,96 @@ std::string response_generate_error_page(std::string resp, std::string new_url)
 void Response::run()
 {
 
-                if (redur == true)
+    if (redur == true)
+    {
+        SendResponse = "HTTP/1.1 301 Moved Permanently\r\n";
+        SendResponse += "Content-Type: text/html\r\n";
+        SendResponse += "Location: " + new_redur;
+    }
+    else
+    {
+        
+        if (check_cgi == false)
+        {
+        
+        }
+        if(methode == "POST")
+            status = 201;
+        else if(status == 0)                        
+            status = 200;
+        std::stringstream buffer;
+        std::string tmp_status = "HTTP/1.1 " + convertIntToString(status);
+        SendResponse = tmp_status + " OK\r\n";
+        std::string new_url;
+        bool dir = false;
+        new_url = url;
+        if(errorpage == 1 || methode == "DELETE")
+        {
+            SendResponse = response_generate_error_page(SendResponse, new_url);
+        }
+        else
+        {
+
+            if (new_url.find(".txt") != std::string::npos)
+            {
+                std::ifstream file(new_url.c_str());
+                if (!file.is_open()) 
                 {
-                    SendResponse = "HTTP/1.1 301 Moved Permanently\r\n";
-                    SendResponse += "Content-Type: text/html\r\n";
-                    SendResponse += "Location: " + new_redur;
+                    std::cerr << "[Server] Impossible d'ouvrir file " << "\n";
                 }
-                else
+                buffer << file.rdbuf();
+                file.close();
+                SendResponse = buffer.str();
+            } 
+            if (directory_listing == 1)
+            {
+                SendResponse += AddContentType();
+                SendResponse += "\r\n";
+                SendResponse += generateHTML(url.c_str());
+                dir = true;
+            }
+            
+            else
+            {
+                if(check_cgi == true)
+                    new_url = url; 
+                else if (check_cgi == false)
                 {
-                    
-                    if (check_cgi == false)
+                    std::ifstream file(new_url.c_str(), std::ios::in);
+                    if (!file.is_open()) 
                     {
-                    
-                    }
-                    if(methode == "POST")
-                       status = 201;
-                    else if(status == 0)                        
-                        status = 200;
-                    std::stringstream buffer;
-                    std::string tmp_status = "HTTP/1.1 " + convertIntToString(status);
-                    SendResponse = tmp_status + " OK\r\n";
-                    std::string new_url;
-                    bool dir = false;
-                    new_url = url;
-                    // std::cout << "new_url -- > " << new_url << std::endl;
-                    // std::cout << "errorpage -- > " << errorpage << std::endl;
-                    if(errorpage == 1 || methode == "DELETE")
-                    {
-
-                        SendResponse = response_generate_error_page(SendResponse, new_url);
-
+                        file.close();
+                        std::string tmp;
+                        if(get_error_pages(convertIntToString(404)).empty())
+                        {
+                            errorpage = 1;
+                            SendResponse = response_generate_error_page(SendResponse, generateErrorPage1(404, "notfound"));
+                        }
+                        else
+                        {
+                            tmp = root + get_error_pages(convertIntToString(404));
+                        }
                     }
                     else
                     {
-
-                            if (new_url.find(".txt") != std::string::npos)
-                            {
-                                std::ifstream file(new_url.c_str());
-                                if (!file.is_open()) 
-                                {
-                                    std::cerr << "[Server] Impossible d'ouvrir file " << "\n";
-                                }
-                                buffer << file.rdbuf();
-                                file.close();
-                                SendResponse = buffer.str();
-                            } 
-                            if (directory_listing == 1)
-                            {
-
-                                // std::cout << "-->new_path directory_listing : "<< url << std::endl;
-                                SendResponse += AddContentType();
-                                SendResponse += "\r\n";
-                                SendResponse += generateHTML(url.c_str());
-                                dir = true;
-                            }
-                            
-                            else
-                            {
-                                // std::cout << "1---->new_url : "<< new_url << std::endl;
-                                if(check_cgi == true)
-                                    new_url = url; 
-                                else if (check_cgi == false)
-                                {
-                                    std::ifstream file(new_url.c_str(), std::ios::in);
-                                    if (!file.is_open()) 
-                                    {
-                                        file.close();
-                                        std::string tmp;
-                                        if(get_error_pages(convertIntToString(404)).empty())
-                                        {
-                                            // std::cout << "lslllslls: |" << new_url.c_str() << "|" << std::endl;
-                                            errorpage = 1;
-                                            SendResponse = response_generate_error_page(SendResponse, generateErrorPage1(404, "notfound"));
-                                            // std::cout << SendResponse << std::endl;
-                                        }
-                                        else
-                                        {
-                                            tmp = root + get_error_pages(convertIntToString(404));
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // std::cout << "00---->new_url : "<< new_url << std::endl;
-                                        // std::cout << "---->char * : "<< new_url.c_str() << std::endl;
-                                        std::string buf;
-                                        buffer << file.rdbuf();
-                                        file.close();
-                                        SendResponse += AddContentType();
-                                        SendResponse += "Content-Lenght: " + convertIntToString(buffer.str().size()) + "\r\n";
-                                    }
-                                    
-                                }  
-                            }
-                            if(directory_listing == false && errorpage == 0)
-                            {
-                                // std::cout << "file 3adi \n";
-                                SendResponse += "\r\n";
-                                SendResponse += buffer.str();
-                            }
-                        }
+                        std::string buf;
+                        buffer << file.rdbuf();
+                        file.close();
+                        SendResponse += AddContentType();
+                        SendResponse += "Content-Lenght: " + convertIntToString(buffer.str().size()) + "\r\n";
                     }
-                check_cgi = false;
-                redur = false;
-                directory_listing = false;
+                    
+                }  
+            }
+            if(directory_listing == false && errorpage == 0)
+            {
+                SendResponse += "\r\n";
+                SendResponse += buffer.str();
+            }
+        }
+    }
+    check_cgi = false;
+    redur = false;
+    directory_listing = false;
                 
 }

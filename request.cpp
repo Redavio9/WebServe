@@ -76,7 +76,6 @@ void Request::CheckChunked()
   if (header.find("chunked") != std::string::npos)
   {
     chunked = true;
-    ////////std::cout << "chunked" << std::endl; 
   }
   if ((pos = body.find("\r\n\r\n")) != std::string::npos)
   {
@@ -89,7 +88,7 @@ int hexStringToDecimal(const std::string& hexString)
     std::stringstream ss;
     ss << std::hex << hexString;
     int decimalValue;
-    ss >> decimalValue; // Convertit la chaîne hexadécimale en décimal
+    ss >> decimalValue;
     return decimalValue;
 }
 int convertStringToInt1(const std::string& str) 
@@ -198,7 +197,6 @@ void Request::UploadFiles()
   bool check = false;
   getline(ss,buf);
   std::string Myboundary = buf.substr(0 , buf.length() - 1);
-  // std::cout << "=====================================ana hna" << Myboundary << std::endl;
   while (getline(ss,buf))
   {
     size_t pos;
@@ -280,7 +278,6 @@ int Request::check_req_valid()
           if(methode.compare("GET") != 0 && methode.compare("POST") != 0 && methode.compare("DELETE") != 0)
           {
             response.status = 501;
-            // std::cout << "Not Implemented" << std::endl;
             if(get_error_pages(convertIntToString1(501)).empty())
             {
                 response.errorpage = 1;
@@ -288,21 +285,15 @@ int Request::check_req_valid()
             }
             else
             response.url = get_error_pages(convertIntToString1(501)); 
-      
             return (0);
-            // response error in respnose 405
           }
         }
         if (j == 1)
         {
           url = buff;
-          //check URL !!!!!!
           checkQuery();
-          // if error is a probleme 414
-        // std::cout << "url :" << url << std::endl;
         if(get_location(url).get_methods(methode) == false)
         {
-            // std::cout << "Not allowed" << std::endl;
             response.status = 405;
             if(get_error_pages(convertIntToString1(4)).empty())
             {
@@ -327,17 +318,12 @@ int Request::check_req_valid()
             // error
           }
         }  
-        if (j == 3)
-        {
-          // error;
-        }
         j++;
       }
     }
     host = header.substr(header.find("Host:") , header.length());
     host = host.substr(0 , host.find("\r\n"));
     SaveHost_Port(host);
-    // check is req valide or not if error response 400
     i++;
   }
   return(1);
@@ -392,8 +378,6 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
   int valread;
   valread = read_socket(socket);
   size_t pos = 0;
-  
-  // header req
   if (valread > 0) 
   {
       buffer[valread] = '\0';
@@ -416,18 +400,10 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
       new_3mara = l3mara + "--";
       check_l3mara = 1;
     }
-
-  // body req && cgi && run response
   if ((request.find("\r\n\r\n") != std::string::npos && Get)  || (request.find("\r\n\r\n0") != std::string::npos && !Get) || (request.find(new_3mara) != std::string::npos && !Get))
   {
     response.errorpage = 0;
-    // std::cout << "\033[0;33m" << "********************************req*************************************" << "\033[0m" << std::endl;
-    // std::cout << "\033[0;33m" << request << "\033[0m" << std::endl;
-    // std::cout << "\033[0;33m" << "*************************************************************************" << "\033[0m" << std::endl;
-
-    // chech max_size !!!!!!!!!!!!!!!!!!
       int tmp = 0;
-      // std::cout << ">>> "<< MaxBodySize << "\n";
       if(convertStringToInt1(MaxBodySize) < body_lenght)
       {
         tmp = 1;
@@ -458,19 +434,11 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
           
           if(!Get)
             body = request.substr(header_len, request.length());
-          // exit(1);
           AddHeaderBody();
           if ((pos = header.find("\r\n\r\n")) != std::string::npos)
             header = header.substr(0, pos + 2);
- 
-          // std::cout << "\033[0;31m" << "*******************************HEADER*************************************" << "\033[0m" << std::endl;
-          // std::cout << "\033[0;31m" << header << "\033[0m" << std::endl;
-          // std::cout << "\033[0;31m" << "**************************************************************************" << "\033[0m" << std::endl;
-          // std::cout << url << "-->" << get_location(url).get_upload_dir().length() << std::endl;
-          // std::cout << methode << "-->"  << std::endl;
           if (get_location(url).get_upload_dir().length() > 0 && methode == "POST")
           {
-            // std::cout << "get_method" << get_location(url).get_methods("POST") << std::endl;
             if(get_location(url).get_methods("POST") == false)
             {
               response.status = 405;
@@ -484,7 +452,6 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
             }
             else
             {
-              // std::cout << "ghid ahila\n";
               cgi = true;
               UploadFiles();
             }
@@ -524,7 +491,6 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
                 cgi.run();
                 if (cgi.time_out == 1)
                 {
-                  // std::cout << "hna\n";
                   response.check_cgi = false;
                   response.status = 504;
                   if(get_error_pages(convertIntToString1(504)).empty())
@@ -537,7 +503,6 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
                 }
                 if (cgi.status_code_error == 1)
                 {
-                  // std::cout << "hna\n";
                   response.check_cgi = false;
                   response.status = 500;
                   if(get_error_pages(convertIntToString1(500)).empty())
@@ -550,7 +515,6 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
                 }
                 else
                   response.url = "/output.txt";
-                // std::cout << "response.errorpage : "<< response.errorpage << std::endl;
               }
           }
         }

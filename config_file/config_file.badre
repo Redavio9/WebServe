@@ -1,7 +1,7 @@
 server:
 	host: localhost
 	port: 2004 2005 2006
-	root: /Users/bel-kdio/Desktop/WS_BETTA/pages/web3
+	root: /Users/bel-kdio/Desktop/WebServe/pages/web3
 	max_body_size: 10000000
 	index: index.html
 	server_name: hello.com
@@ -14,10 +14,6 @@ server:
 		405: ErrorPages/405.html
 		413: ErrorPages/413.html
 
-location: /
-	upload_dir: /upload
-	index: index_.html
-	methods: GET POST
 
 
 location: /upload_cgi/

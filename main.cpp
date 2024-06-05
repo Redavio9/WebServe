@@ -12,20 +12,17 @@
 
 #include "Server.hpp"
 
-void fun(int i)
-{
-    (void)i;
-}
+// void fun(int i)
+// {
+//     (void)i;
+// }
+
 int main(int ac, char **av)
 {
     std::string name;
-    // (void) av;
-    signal(SIGPIPE, fun);
+    // signal(SIGPIPE, fun);
     if(ac > 2)
-    {
-        ////////////std::cout << "just add the of the config file to the executable" << std::endl;
-        exit(0);
-    }
+        exit(1);
     if(ac == 1)
         name = "./config_file/config_file.badre";
     else
@@ -41,6 +38,4 @@ int main(int ac, char **av)
     server.CreatServers();  
     server.run();
     return  0;
-    //////////std::cout<<servers[0].get_port()<<std::endl;
-
 }
