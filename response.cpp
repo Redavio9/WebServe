@@ -48,12 +48,32 @@ std::string Response::GetBody()
   return(this->body);
 }
 
+std::string normalizeSlashes(const std::string &input) {
+    std::string result;
+    bool lastWasSlash = false;
 
+    for (std::string::const_iterator it = input.begin(); it != input.end(); ++it) {
+        if (*it == '/') {
+            if (!lastWasSlash) {
+                result += *it;
+                lastWasSlash = true;
+            }
+        } else {
+            result += *it;
+            lastWasSlash = false;
+        }
+    }
+
+    return result;
+}
 
 
 std::string Response::generateHTML(const char* path) {
-  DIR *dir = opendir(path);
+
+  DIR *dir = opendir(normalizeSlashes(path).c_str());
   if (!dir) {
+
+    std::cout << normalizeSlashes(path) << std::endl;
     return "";
   }
 
@@ -178,10 +198,10 @@ void Response::run()
     else
     {
         
-        if (check_cgi == false)
-        {
+        // if (check_cgi == false)
+        // {
         
-        }
+        // }
         if(methode == "POST")
             status = 201;
         else if(status == 0)                        
@@ -190,7 +210,7 @@ void Response::run()
         std::string tmp_status = "HTTP/1.1 " + convertIntToString(status);
         SendResponse = tmp_status + " OK\r\n";
         std::string new_url;
-        bool dir = false;
+        // bool dir = false;
         new_url = url;
         if(errorpage == 1 || methode == "DELETE")
         {
@@ -199,23 +219,25 @@ void Response::run()
         else
         {
 
-            if (new_url.find(".txt") != std::string::npos)
-            {
-                std::ifstream file(new_url.c_str());
-                if (!file.is_open()) 
-                {
-                    std::cerr << "[Server] Impossible d'ouvrir file " << "\n";
-                }
-                buffer << file.rdbuf();
-                file.close();
-                SendResponse = buffer.str();
-            } 
+            // if (new_url.find(".txt") != std::string::npos)
+            // {
+            //     std::ifstream file(new_url.c_str());
+            //     if (!file.is_open()) 
+            //     {
+            //         std::cerr << "[Server] Impossible d'ouvrir file " << "\n";
+            //     }
+            //     buffer << file.rdbuf();
+            //     file.close();
+            //     SendResponse = buffer.str();
+            // } 
             if (directory_listing == 1)
             {
                 SendResponse += AddContentType();
                 SendResponse += "\r\n";
                 SendResponse += generateHTML(url.c_str());
-                dir = true;
+        
+                std::cout << SendResponse << std::endl;
+                // dir = true;
             }
             
             else

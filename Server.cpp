@@ -236,7 +236,6 @@ void Server::checkResponse1(int sock, std::string host)
     mapinfo[sock].request.response.errorpage = 0;
 
                 struct stat fileStat;
-                struct stat direStat;
                 std::string tmp1;
                 mapinfo[sock].request.response.redur = false;
                 if (mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)
@@ -254,25 +253,26 @@ void Server::checkResponse1(int sock, std::string host)
                     mapinfo[sock].request.response.url = "/Users/rarraji/Desktop/prj/WS_BETTA/pages/images/me.png";
                     return;
                 }
-                stat(tmp1.c_str(), &direStat);
-                if(tmp1[tmp1.length() - 1] != '/' && mapinfo[sock].request.methode != "DELETE" && S_ISDIR(direStat.st_mode))
-                {
-                    mapinfo[sock].request.url += '/';
-                    mapinfo[sock].request.response.url += '/'; 
-                    mapinfo[sock].request.response.redur = true;
-                    mapinfo[sock].request.response.new_redur = mapinfo[sock].request.response.url;
-                    return;
-                }
+                
                 if (mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url().length() >= 1)
                 {
                     mapinfo[sock].request.response.redur = true;
                     mapinfo[sock].request.response.new_redur = mapinfo[sock].get_location(mapinfo[sock].request.url).get_redirect_url();
                     return;
                 }
-                else if (stat(tmp1.c_str(), &fileStat) == 0) 
+                if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
+                {
+                    size_t len = mapinfo[sock].get_location_first(mapinfo[sock].request.url).size();
+                    std::cout << "len: " << mapinfo[sock].get_location_first(mapinfo[sock].request.url) << std::endl;
+                    // size_t pos = mapinfo[sock].request.url.find(mapinfo[sock].get_location_first(mapinfo[sock].request.url));
+                    mapinfo[sock].request.response.url = mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias() + mapinfo[sock].request.url.substr(len);
+                    std::cout << "alias " << mapinfo[sock].request.response.url << std::endl;
+                    tmp1 = mapinfo[sock].request.response.url;
+                    // mapinfo[sock].request.url = mapinfo[sock].request.response.url;
+                }
+                if (stat(tmp1.c_str(), &fileStat) == 0) 
                 {
                     int j = 0;
-
                     if (S_ISDIR(fileStat.st_mode))
                     {
                         std::string tmp  = tmp1;
@@ -281,6 +281,14 @@ void Server::checkResponse1(int sock, std::string host)
                             j = 1;
                         if(mapinfo[sock].request.methode != "DELETE")
                         {
+                            if(mapinfo[sock].request.url[mapinfo[sock].request.url.length() - 1] != '/')
+                            {
+                                mapinfo[sock].request.url += '/';
+                                mapinfo[sock].request.response.url = mapinfo[sock].request.url;
+                                mapinfo[sock].request.response.redur = true;
+                                mapinfo[sock].request.response.new_redur = mapinfo[sock].request.response.url;
+                                return;
+                            }
 
                             // if(this->mapinfo[sock].get_location_first(mapinfo[sock].request.url ).compare((mapinfo[sock].request.url)) == 0) 
                             // {
@@ -292,19 +300,24 @@ void Server::checkResponse1(int sock, std::string host)
                             //     std::cout << "ISN'T LOCATION" << std::endl;
                             //     j = 1;
                             // }
-                            // std::cout << "index To serve : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_index().length() << std::endl;   
+                            std::cout << "alias lenght : " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() << std::endl;   
                             if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_index().length() > 1)
                             {
-                                if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
+                                std::cout << "d5alna l check dyal index: " << mapinfo[sock].get_location(mapinfo[sock].request.url).get_index() << std::endl;   
+                                if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() < 1)
                                 {
-                                    mapinfo[sock].request.response.url = mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias() + mapinfo[sock].get_location(mapinfo[sock].request.url).get_index();
+
+                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.url ;
                                 }
-                                else
-                                {
-                                    mapinfo[sock].request.response.url = mapinfo[sock].root;
-                                    mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location_first(mapinfo[sock].request.url);
+                                    // mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location_first(mapinfo[sock].request.url);
                                     mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location(mapinfo[sock].request.url).get_index();
-                                }
+                                
+                                // if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() < 1)
+                                // {
+                                //     mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.url ;
+                                //     // mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location_first(mapinfo[sock].request.url);
+                                //     mapinfo[sock].request.response.url = mapinfo[sock].request.response.url + mapinfo[sock].get_location(mapinfo[sock].request.url).get_index();
+                                // }
                                 if(mapinfo[sock].request.response.url.find(".py") != std::string::npos)
                                 {
                                     mapinfo[sock].request.response.check_cgi = true;
@@ -343,16 +356,21 @@ void Server::checkResponse1(int sock, std::string host)
                                     else
                                         mapinfo[sock].request.response.url = mapinfo[sock].root + "/output.txt";
                                 }
-                                j = 1;
-                                return;
-                            }
-                            if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_directory_listing().compare("true") == 0)
-                            {
-                                if(mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)
+                                std::cout << "access: " << mapinfo[sock].request.response.url.c_str() <<std::endl;
+                                if(access(mapinfo[sock].request.response.url.c_str(), F_OK) == 0)
                                 {
-                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.response.url;
-                                    mapinfo[sock].request.response.directory_listing = true;
+                                    j = 1;
+                                    return;
                                 }
+                            }
+                            std::cout << "j : " << j << std::endl;
+                            if (j == 0 && mapinfo[sock].get_location(mapinfo[sock].request.url).get_directory_listing() == "true")
+                            {
+                                // if(mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)
+                                // {
+                                    mapinfo[sock].request.response.url = mapinfo[sock].root + mapinfo[sock].request.url;
+                                    mapinfo[sock].request.response.directory_listing = true;
+                                // }
                                 return;
                             }
                             else
@@ -401,18 +419,21 @@ void Server::checkResponse1(int sock, std::string host)
                         }
 
                     }
-                        if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
-                        {
-                            std::cout << "alias" << std::endl;
-                            if(mapinfo[sock].request.response.url.find(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias()) == std::string::npos)
-                                mapinfo[sock].request.response.url = mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias() +  mapinfo[sock].request.response.url;
-                        }
-                        else
-                        {
-                            if(mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)
-                                mapinfo[sock].request.response.url = mapinfo[sock].root +  mapinfo[sock].request.response.url;
-                        }
+                    if(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias().length() > 1)
+                    {
+                        std::cout << "alias" << std::endl;
+                        if(mapinfo[sock].request.response.url.find(mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias()) == std::string::npos)
+                            mapinfo[sock].request.response.url = mapinfo[sock].get_location(mapinfo[sock].request.url).get_alias() +  mapinfo[sock].request.response.url;
+                            return;
                     }
+                    else
+                    {
+                        if(mapinfo[sock].request.response.url.find(mapinfo[sock].root) == std::string::npos)
+                            mapinfo[sock].request.response.url = mapinfo[sock].root +  mapinfo[sock].request.response.url;
+                        std::cout << "file :" << mapinfo[sock].request.response.url << std::endl;
+                        return;
+                    }
+                }
                    
                     else if (stat(tmp1.c_str(), &fileStat) != 0)
                     {

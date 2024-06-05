@@ -64,6 +64,15 @@ std::string infoserv::get_error_pages(std::string key)
 
 std::string infoserv::get_location_first(std::string index)
 {
-    std::map<std::string, location_param>::iterator it = location.find(index);
-    return it->first;
+    location_param tmp = get_location(index);
+    std::map<std::string, location_param>::iterator it = location.begin();
+    std::map<std::string, location_param>::iterator ite = location.end();
+    for (; it != ite; it++)
+    {
+        if((*it).second == tmp)
+        {
+            return (it->first);
+        }
+    }
+    return "";
 }

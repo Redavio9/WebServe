@@ -378,7 +378,13 @@ void Request::Check_read(int socket, fd_set &read_fds, fd_set &write_fds)
   int valread;
   valread = read_socket(socket);
   size_t pos = 0;
-  if (valread > 0) 
+  if (valread == 0 || valread == -1)
+  {
+    FD_CLR(socket, &read_fds);
+    close(socket);
+    return;
+  }
+  if (valread > 0)
   {
       buffer[valread] = '\0';
       request.append(buffer, valread);
